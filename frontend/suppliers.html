@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Suppliers</title>
+  <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="wrapper">
+  <!-- Sidebar -->
+  <div id="sidebar-wrapper"></div>
+
+  <!-- Page Content -->
+  <div id="page-content-wrapper">
+    <nav class="top-navbar d-flex align-items-center justify-content-between shadow-sm">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-list fs-3" id="menu-toggle"></i>
+        <h4 class="ms-3 m-0 page-title">Supplier Management</h4>
+      </div>
+      <div class="user-info">
+        <span class="user-role-badge" id="userRoleBadge">User</span>
+        <span class="fw-semibold text-secondary" id="userNameLabel">Loading...</span>
+        <button class="btn btn-outline-danger btn-sm ms-3" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
+      </div>
+    </nav>
+    
+    <div class="container-fluid py-4 px-4">
+      
+      <!-- Header -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1">Suppliers</h3>
+          <p class="text-muted mb-0">Manage inventory suppliers and external vendors</p>
+        </div>
+        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#supplierModal">
+          <i class="bi bi-plus-lg me-1"></i> Add Supplier
+        </button>
+      </div>
+
+      <!-- Search & Table Card -->
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <input type="text" id="searchSupplier" class="form-control mb-4" placeholder="Search supplier by name, email, or company...">
+          
+          <div class="table-responsive">
+            <table class="table table-hover align-middle">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Contact Email</th>
+                  <th>Phone Number</th>
+                  <th>Company Name</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody id="supplierTable">
+                <tr><td colspan="5" class="text-center text-muted py-4">Loading suppliers...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<!-- Add/Edit Supplier Modal -->
+<div class="modal fade" id="supplierModal" tabindex="-1">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-primary text-white border-0">
+        <h5 class="modal-title fw-bold" id="supplierModalTitle">Add Supplier</h5>
+        <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+      </div>
+      <div class="modal-body p-4">
+        <div class="mb-3">
+          <label class="form-label">Contact Name</label>
+          <input type="text" id="supName" class="form-control" required maxlength="100" placeholder="e.g. Jane Doe">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Email</label>
+          <input type="email" id="supEmail" class="form-control" maxlength="100" placeholder="e.g. vendor@supply.com">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Phone</label>
+          <input type="tel" id="supPhone" class="form-control" maxlength="20" placeholder="e.g. +1 800 123 4567">
+        </div>
+        <div class="mb-3">
+          <label class="form-label">Company Name</label>
+          <input type="text" id="supCompany" class="form-control" maxlength="100" placeholder="e.g. Global Supplies INC">
+        </div>
+      </div>
+      <div class="modal-footer border-0 pt-0 px-4 pb-4">
+        <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+        <button class="btn btn-primary px-4" id="saveSupplier">Save Supplier</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+<script src="auth.js"></script>
+<script src="layout.js"></script>
+<script src="script.js"></script>
+
+<script>
+let suppliers = [];
+let editId = null;
+
+const table = document.getElementById("supplierTable");
+const saveBtn = document.getElementById("saveSupplier");
+const searchInput = document.getElementById("searchSupplier");
+
+const userStr = localStorage.getItem('user');
+const currentUser = userStr ? JSON.parse(userStr) : null;
+const isAdmin = currentUser && currentUser.role === 'Admin';
+
+async function fetchSuppliers() {
+  try {
+    const res = await fetch(`${API_URL}/suppliers`, { headers: getAuthHeaders() });
+    suppliers = await res.json();
+    renderSuppliers();
+  } catch(err) { console.error(err); }
+}
+
+function renderSuppliers() {
+  table.innerHTML = "";
+  if (!suppliers || suppliers.length === 0) {
+    table.innerHTML = `<tr><td colspan="5" class="text-center text-muted py-4">No suppliers found. Click "Add Supplier" to create one.</td></tr>`;
+    return;
+  }
+  suppliers.forEach((s) => {
+    const adminActions = isAdmin ? `
+      <button class="btn btn-sm btn-outline-primary shadow-sm me-1" onclick="editSupplier('${s._id}')" title="Edit"><i class="bi bi-pencil"></i></button>
+      <button class="btn btn-sm btn-outline-danger shadow-sm" onclick="deleteSupplier('${s._id}')" title="Delete"><i class="bi bi-trash"></i></button>
+    ` : '';
+
+    table.innerHTML += `
+      <tr>
+        <td class="fw-semibold text-dark">${s.name}</td>
+        <td>${s.email || "—"}</td>
+        <td>${s.phone || "—"}</td>
+        <td><i class="bi bi-building me-2 text-primary"></i>${s.company || "—"}</td>
+        <td>
+          ${adminActions}
+        </td>
+      </tr>
+    `;
+  });
+}
+
+saveBtn.addEventListener("click", async function () {
+  const name = document.getElementById("supName").value.trim();
+  const email = document.getElementById("supEmail").value.trim();
+  const phone = document.getElementById("supPhone").value.trim();
+  const company = document.getElementById("supCompany").value.trim();
+
+  if (!name) return alert("Please enter a supplier name.");
+
+  const payload = { name, email, phone, company };
+  
+  try {
+    let res;
+    if (editId) {
+      res = await fetch(`${API_URL}/suppliers/${editId}`, {
+        method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload)
+      });
+      editId = null;
+      document.getElementById("supplierModalTitle").innerText = "Add Supplier";
+    } else {
+      res = await fetch(`${API_URL}/suppliers`, {
+        method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload)
+      });
+    }
+    
+    if (res.ok) {
+      fetchSuppliers();
+      clearForm();
+      bootstrap.Modal.getInstance(document.getElementById("supplierModal")).hide();
+    } else {
+      alert("Error saving supplier. Check permissions.");
+    }
+  } catch(err) { console.error(err); }
+});
+
+async function deleteSupplier(id) {
+  const s = suppliers.find(x => x._id === id);
+  if (confirm(`Are you sure you want to delete supplier "${s.name}"?`)) {
+    try {
+      const res = await fetch(`${API_URL}/suppliers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      if(res.ok) fetchSuppliers();
+      else alert("Restricted: Admins only.");
+    } catch(err) { console.error(err); }
+  }
+}
+
+function editSupplier(id) {
+  const s = suppliers.find(x => x._id === id);
+  document.getElementById("supName").value = s.name;
+  document.getElementById("supEmail").value = s.email || "";
+  document.getElementById("supPhone").value = s.phone || "";
+  document.getElementById("supCompany").value = s.company || "";
+  editId = id;
+  document.getElementById("supplierModalTitle").innerText = "Edit Supplier";
+  new bootstrap.Modal(document.getElementById("supplierModal")).show();
+}
+
+searchInput.addEventListener("input", function () {
+  const value = this.value.toLowerCase();
+  const rows = table.querySelectorAll("tr");
+  rows.forEach(row => {
+    row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
+  });
+});
+
+function clearForm() {
+  document.getElementById("supName").value = "";
+  document.getElementById("supEmail").value = "";
+  document.getElementById("supPhone").value = "";
+  document.getElementById("supCompany").value = "";
+}
+
+fetchSuppliers();
+</script>
+</body>
+</html>

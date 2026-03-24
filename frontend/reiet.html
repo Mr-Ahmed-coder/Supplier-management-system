@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice - HairLine Beauty</title>
+
+<style>
+body {
+    font-family: Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+}
+
+.invoice {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    border: 1px solid #ddd;
+    padding: 20px;
+}
+
+.header {
+    text-align: center;
+    background: #667eea;
+    color: white;
+    padding: 20px;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border-bottom: 1px solid #ddd;
+}
+
+.summary {
+    margin-top: 20px;
+    text-align: center;
+}
+
+.overdue { color: red; }
+.paid { color: green; }
+</style>
+</head>
+
+<body>
+
+<div class="invoice">
+
+    <div class="header">
+        <h2>INVOICE #HLB-2024-001</h2>
+        <p>Date: 15 Oct 2024 | Due: 14 Nov 2024</p>
+    </div>
+
+    <h3>Customer:</h3>
+    <p>Nakato Beauty Salon - Kampala</p>
+
+    <table>
+        <tr>
+            <th>Item</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Total</th>
+        </tr>
+
+        <tr>
+            <td>Hair Extensions</td>
+            <td>5</td>
+            <td>45,000</td>
+            <td>225,000</td>
+        </tr>
+
+        <tr>
+            <td>Argan Oil</td>
+            <td>3</td>
+            <td>35,000</td>
+            <td>105,000</td>
+        </tr>
+    </table>
+
+    <div class="summary">
+        <p><strong>Subtotal:</strong> UGX 486,000</p>
+        <p class="paid"><strong>Cash Paid:</strong> UGX 200,000</p>
+        <p class="overdue"><strong>Balance Due:</strong> UGX 286,000</p>
+    </div>
+
+</div>
+
+</body>
+</html>

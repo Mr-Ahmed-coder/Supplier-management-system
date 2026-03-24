@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reports & Analytics</title>
+  <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="wrapper">
+  <!-- Sidebar -->
+  <div id="sidebar-wrapper"></div>
+
+  <!-- Page Content -->
+  <div id="page-content-wrapper">
+    <nav class="top-navbar d-flex align-items-center justify-content-between shadow-sm">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-list fs-3" id="menu-toggle"></i>
+        <h4 class="ms-3 m-0 page-title">Business Analytics</h4>
+      </div>
+      <div class="user-info">
+        <span class="user-role-badge" id="userRoleBadge">User</span>
+        <span class="fw-semibold text-secondary" id="userNameLabel">Loading...</span>
+        <button class="btn btn-outline-danger btn-sm ms-3" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
+      </div>
+    </nav>
+    
+    <div class="container-fluid py-4 px-4">
+      
+      <!-- Summary Cards -->
+      <div class="row g-4 mb-4">
+        <div class="col-md-3">
+          <div class="stat-card bg-sales shadow-sm">
+            <h6>Total Revenue</h6>
+            <h3 id="reportRevenue">$0.00</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card bg-stock shadow-sm">
+            <h6>Unique Products</h6>
+            <h3 id="reportProducts">0</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card bg-debts shadow-sm">
+            <h6>Total Customers</h6>
+            <h3 id="reportCustomers">0</h3>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="stat-card bg-alerts shadow-sm">
+            <h6>Total Overdue</h6>
+            <h3 id="reportOverdue">$0.00</h3>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 1 -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title text-muted fw-bold">Invoice Status Breakdown</h5>
+              <div style="max-height: 300px; display:flex; justify-content:center;">
+                <canvas id="statusChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title text-muted fw-bold">Inventory by Category</h5>
+              <div style="max-height: 300px; display:flex; justify-content:center;">
+                <canvas id="inventoryChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row 2 -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title text-muted fw-bold">Revenue Timeline</h5>
+              <canvas id="revenueChart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-4">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title text-muted fw-bold">Stock Health</h5>
+              <div style="max-height: 280px; display:flex; justify-content:center;">
+                <canvas id="stockHealthChart"></canvas>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Lists Row -->
+      <div class="row g-4 mb-4">
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title border-bottom pb-2 mb-3">Top Customers Invoiced</h5>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="bg-light text-muted">
+                    <tr>
+                      <th>#</th>
+                      <th>Customer Name</th>
+                      <th>Total Amt ($)</th>
+                      <th>Count</th>
+                    </tr>
+                  </thead>
+                  <tbody id="topCustomersTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-lg-6">
+          <div class="card shadow-sm h-100">
+            <div class="card-body">
+              <h5 class="card-title border-bottom pb-2 mb-3">High-Value Stock Products</h5>
+              <div class="table-responsive">
+                <table class="table table-hover align-middle">
+                  <thead class="bg-light text-muted">
+                    <tr>
+                      <th>#</th>
+                      <th>Product</th>
+                      <th>Units</th>
+                      <th>Total Value ($)</th>
+                    </tr>
+                  </thead>
+                  <tbody id="topProductsTable"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+<script src="auth.js"></script>
+<script src="layout.js"></script>
+<script src="script.js"></script>
+
+<script>
+let invoices = [];
+let products = [];
+let customers = [];
+
+async function fetchReportData() {
+  try {
+    const [invRes, prodRes, custRes] = await Promise.all([
+      fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() }),
+      fetch(`${API_URL}/products`, { headers: getAuthHeaders() }),
+      fetch(`${API_URL}/customers`, { headers: getAuthHeaders() })
+    ]);
+    invoices = await invRes.json();
+    products = await prodRes.json();
+    customers = await custRes.json();
+
+    loadSummary();
+    renderStatusChart();
+    renderInventoryChart();
+    renderRevenueChart();
+    renderStockHealthChart();
+    renderTopCustomers();
+    renderTopProducts();
+  } catch(err) { console.error(err); }
+}
+
+function loadSummary() {
+  let totalRevenue = 0;
+  let overdueAmount = 0;
+
+  invoices.forEach(inv => {
+    const amount = parseFloat(inv.amount) || 0;
+    totalRevenue += amount;
+    if (inv.status === "Overdue") overdueAmount += amount;
+  });
+
+  document.getElementById("reportRevenue").innerText = `$${totalRevenue.toFixed(2)}`;
+  document.getElementById("reportProducts").innerText = products.length;
+  document.getElementById("reportCustomers").innerText = customers.length;
+  document.getElementById("reportOverdue").innerText = `$${overdueAmount.toFixed(2)}`;
+}
+
+let statusChartObj, inventoryChartObj, revenueChartObj, stockHealthChartObj;
+
+Chart.defaults.font.family = 'Inter, sans-serif';
+Chart.defaults.color = '#64748b';
+
+function renderStatusChart() {
+  const paid = invoices.filter(i => i.status === "Paid").length;
+  const pending = invoices.filter(i => i.status === "Pending").length;
+  const overdue = invoices.filter(i => i.status === "Overdue").length;
+
+  const ctx = document.getElementById("statusChart").getContext("2d");
+  if(statusChartObj) statusChartObj.destroy();
+  
+  if (invoices.length === 0) {
+    ctx.font = "14px Inter";
+    ctx.fillStyle = "#94a3b8";
+    ctx.textAlign = "center";
+    ctx.fillText("No invoice data yet", ctx.canvas.width / 2, 160);
+    return;
+  }
+
+  statusChartObj = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["Paid", "Pending", "Overdue"],
+      datasets: [{
+        data: [paid, pending, overdue],
+        backgroundColor: ["#10b981", "#f59e0b", "#ef4444"],
+        borderWidth: 0
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: "bottom" } }, cutout: '70%' }
+  });
+}
+
+function renderInventoryChart() {
+  const ctx = document.getElementById("inventoryChart").getContext("2d");
+  if(inventoryChartObj) inventoryChartObj.destroy();
+
+  if (products.length === 0) {
+    ctx.font = "14px Inter";
+    ctx.fillStyle = "#94a3b8";
+    ctx.textAlign = "center";
+    ctx.fillText("No product data yet", ctx.canvas.width / 2, 160);
+    return;
+  }
+
+  const categories = {};
+  products.forEach(p => {
+    const cat = p.category || "Uncategorized";
+    categories[cat] = (categories[cat] || 0) + (parseFloat(p.price) * parseInt(p.stock));
+  });
+
+  inventoryChartObj = new Chart(ctx, {
+    type: "bar",
+    data: {
+      labels: Object.keys(categories),
+      datasets: [{
+        label: "Stock Value ($)", data: Object.values(categories),
+        backgroundColor: "#3b82f6", borderRadius: 4, barThickness: 40
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: true,
+      plugins: { legend: { display: false } },
+      scales: {
+          x: { grid: { display: false } }, 
+          y: { beginAtZero: true, border: {dash: [4, 4]}, grid:{color: "#e2e8f0"} }
+      }
+    }
+  });
+}
+
+function renderRevenueChart() {
+  const ctx = document.getElementById("revenueChart").getContext("2d");
+  if(revenueChartObj) revenueChartObj.destroy();
+
+  if (invoices.length === 0) {
+    ctx.font = "14px Inter";
+    ctx.fillStyle = "#94a3b8";
+    ctx.textAlign = "center";
+    ctx.fillText("No invoice data yet", ctx.canvas.width / 2, 120);
+    return;
+  }
+
+  const dateMap = {};
+  invoices.forEach(inv => {
+    const date = inv.date || new Date(inv.createdAt).toLocaleDateString("en-CA");
+    if(!dateMap[date]) dateMap[date] = 0;
+    dateMap[date] += (parseFloat(inv.amount) || 0);
+  });
+
+  const sortedDates = Object.keys(dateMap).sort();
+  const amounts = sortedDates.map(d => dateMap[d]);
+
+  revenueChartObj = new Chart(ctx, {
+    type: "line",
+    data: {
+      labels: sortedDates,
+      datasets: [{
+        label: "Revenue ($)", data: amounts, fill: true,
+        backgroundColor: "rgba(59, 130, 246, 0.1)", borderColor: "#3b82f6",
+        borderWidth: 3, tension: 0.4, pointBackgroundColor: "#fff", pointBorderColor: "#3b82f6", pointRadius: 5, pointBorderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true, plugins: { legend: { display: false } },
+      scales: { 
+          x: { grid: { display: false } },
+          y: { beginAtZero: true, grid: { color: "#e2e8f0" } } 
+      }
+    }
+  });
+}
+
+function renderStockHealthChart() {
+  const ctx = document.getElementById("stockHealthChart").getContext("2d");
+  if(stockHealthChartObj) stockHealthChartObj.destroy();
+
+  if (products.length === 0) {
+    ctx.font = "14px Inter";
+    ctx.fillStyle = "#94a3b8";
+    ctx.textAlign = "center";
+    ctx.fillText("No product data yet", ctx.canvas.width / 2, 140);
+    return;
+  }
+
+  const inStock = products.filter(p => p.stock > 10).length;
+  const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;
+  const outStock = products.filter(p => p.stock === 0).length;
+
+  stockHealthChartObj = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+      labels: ["In Stock", "Low Stock", "Out of Stock"],
+      datasets: [{
+        data: [inStock, lowStock, outStock],
+        backgroundColor: ["#10b981", "#f59e0b", "#ef4444"],
+        borderWidth: 0
+      }]
+    },
+    options: { responsive: true, maintainAspectRatio: true, plugins: { legend: { position: "bottom" } }, cutout: '70%'}
+  });
+}
+
+function renderTopCustomers() {
+  const tbody = document.getElementById("topCustomersTable");
+
+  if (!invoices || invoices.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">No invoice data yet</td></tr>`;
+    return;
+  }
+
+  const custMap = {};
+  invoices.forEach(inv => {
+    const name = inv.customerName || (inv.customer ? inv.customer.name : 'Unknown');
+    if (!custMap[name]) custMap[name] = { total: 0, count: 0 };
+    custMap[name].total += parseFloat(inv.amount) || 0;
+    custMap[name].count++;
+  });
+
+  const sorted = Object.entries(custMap).sort((a, b) => b[1].total - a[1].total).slice(0, 5);
+
+  tbody.innerHTML = "";
+  sorted.forEach(([name, data], i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td class="text-muted">${i + 1}</td>
+        <td class="fw-semibold text-dark">${name}</td>
+        <td class="fw-bold text-primary">$${data.total.toFixed(2)}</td>
+        <td class="text-muted">${data.count}</td>
+      </tr>
+    `;
+  });
+}
+
+function renderTopProducts() {
+  const tbody = document.getElementById("topProductsTable");
+
+  if (!products || products.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-3">No product data yet</td></tr>`;
+    return;
+  }
+
+  const sorted = [...products]
+    .map(p => ({ ...p, value: parseFloat(p.price) * parseInt(p.stock) }))
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 5);
+
+  tbody.innerHTML = "";
+  sorted.forEach((p, i) => {
+    tbody.innerHTML += `
+      <tr>
+        <td class="text-muted">${i + 1}</td>
+        <td class="fw-semibold text-dark">${p.name}</td>
+        <td class="text-muted"><span class="badge bg-light text-dark border">${p.stock}</span></td>
+        <td class="fw-bold text-success">$${p.value.toFixed(2)}</td>
+      </tr>
+    `;
+  });
+}
+
+fetchReportData();
+</script>
+</body>
+</html>

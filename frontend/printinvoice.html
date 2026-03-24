@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Invoice Print</title>
+<link rel="stylesheet" href="style.css">
+
+<style>
+  * 
+  /* { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: #f4f4f4;
+    padding: 20px;
+  }
+
+  /* Top action bar — hidden when printing */
+   */
+</style>
+</head>
+
+<body>
+
+<!-- Action buttons — hidden during print -->
+<div class="action-bar">
+  <button class="btn-back" onclick="window.history.back()">&#8592; Back</button>
+  <button class="btn-print" onclick="window.print()">&#128438; Print / Download PDF</button>
+</div>
+
+<div class="invoice">
+
+  <div class="header">
+    <h2 id="invoiceNumber">INVOICE #---</h2>
+    <p id="invoiceDates">Date: --- | Due: ---</p>
+  </div>
+
+  <div class="customer-info">
+    <h3>Customer:</h3>
+    <p id="customerName">Loading...</p>
+  </div>
+
+  <table class="invoice-table">
+    <thead>
+      <tr>
+        <th>Item</th>
+        <th>Qty</th>
+        <th>Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody id="itemsBody">
+      <tr>
+        <td colspan="4" style="text-align:center;color:#aaa;">Loading...</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <div class="summary" id="summarySection">
+    <!-- Filled by JS -->
+  </div>
+
+  <div class="invoice-footer">
+    Supplier Company &mdash; Thank you for your business!
+  </div>
+
+</div>
+
+<script>
+  const API_URL = '/api';
+
+  function getAuthHeaders() {
+    const token = localStorage.getItem('token');
+    return {
+      'Content-Type': 'application/json',
+      'Authorization': 'Bearer ' + (token || '')
+    };
+  }
+
+  function formatDate(dateStr) {
+    if (!dateStr) return '---';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '---';
+    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function getDueDate(dateStr) {
+    if (!dateStr) return '---';
+    const d = new Date(dateStr);
+    if (isNaN(d)) return '---';
+    d.setDate(d.getDate() + 30); // Due 30 days after issue
+    return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+  }
+
+  function formatCurrency(num) {
+    return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  }
+
+  async function loadInvoice() {
+    const params = new URLSearchParams(window.location.search);
+    const invoiceId = params.get('id');
+
+    if (!invoiceId) {
+      document.getElementById('customerName').textContent = 'No invoice ID provided';
+      return;
+    }
+
+    try {
+      // Fetch invoice
+      const invRes = await fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() });
+      const invoices = await invRes.json();
+      const inv = invoices.find(x => x._id === invoiceId);
+
+      if (!inv) {
+        document.getElementById('customerName').textContent = 'Invoice not found';
+        return;
+      }
+
+      // Header
+      document.getElementById('invoiceNumber').textContent = `INVOICE #${inv.number}`;
+      document.getElementById('invoiceDates').textContent =
+        `Date: ${formatDate(inv.date || inv.createdAt)} | Due: ${getDueDate(inv.date || inv.createdAt)}`;
+      document.title = `Invoice ${inv.number}`;
+
+      // Customer
+      const custName = inv.customerName || (inv.customer ? inv.customer.name : 'Unknown');
+      document.getElementById('customerName').textContent = custName;
+
+      // Items table — show invoice as a single line item
+      const tbody = document.getElementById('itemsBody');
+      tbody.innerHTML = `
+        <tr>
+          <td>Invoice Charge</td>
+          <td>1</td>
+          <td>${formatCurrency(inv.amount)}</td>
+          <td>${formatCurrency(inv.amount)}</td>
+        </tr>
+      `;
+
+      // Fetch receipts (payments) linked to this invoice
+      let totalPaid = 0;
+      try {
+        const rcptRes = await fetch(`${API_URL}/receipts`, { headers: getAuthHeaders() });
+        const receipts = await rcptRes.json();
+        const linkedReceipts = receipts.filter(r =>
+          (r.invoice && (r.invoice === invoiceId || r.invoice._id === invoiceId))
+        );
+
+        // Add paid receipt rows to the items table if any
+        if (linkedReceipts.length > 0) {
+          linkedReceipts.forEach(r => {
+            totalPaid += Number(r.amount);
+          });
+        }
+      } catch (e) {
+        console.log('Could not fetch receipts:', e);
+      }
+
+      // Summary
+      const subtotal = Number(inv.amount);
+      const balance = subtotal - totalPaid;
+      const summary = document.getElementById('summarySection');
+
+      let statusClass = 'pending';
+      if (inv.status === 'Paid') statusClass = 'paid';
+      else if (inv.status === 'Overdue') statusClass = 'overdue';
+
+      summary.innerHTML = `
+        <p><strong>Subtotal:</strong> $${formatCurrency(subtotal)}</p>
+        ${totalPaid > 0 ? `<p class="paid"><strong>Cash Paid:</strong> $${formatCurrency(totalPaid)}</p>` : ''}
+        <p class="amount-highlight ${statusClass}">
+          <strong>${inv.status === 'Paid' ? 'Fully Paid' : 'Balance Due'}:</strong>
+          $${formatCurrency(balance > 0 ? balance : 0)}
+        </p>
+        <p style="margin-top:8px;font-size:13px;color:#aaa;">Status: <span class="${statusClass}" style="text-transform:uppercase;">${inv.status}</span></p>
+      `;
+
+    } catch (err) {
+      console.error('Error loading invoice:', err);
+      document.getElementById('customerName').textContent = 'Error loading invoice data';
+    }
+  }
+
+  loadInvoice();
+</script>
+
+</body>
+</html>

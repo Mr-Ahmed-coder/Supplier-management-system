@@ -1,0 +1,505 @@
+/* ============================================================
+   CUSTOMER SUPPLIER SYSTEM — Modern Sidebar Master Stylesheet
+   ============================================================ */
+
+/* ─── 1. BASE AND TYPOGRAPHY ─── */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+
+body {
+  margin: 0;
+  background-color: #f8fafc; /* Slate 50 */
+  font-family: 'Inter', system-ui, -apple-system, sans-serif;
+  color: #334155; /* Slate 700 */
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 600;
+  color: #0f172a; /* Slate 900 */
+}
+
+.text-muted {
+  color: #64748b !important; /* Slate 500 */
+}
+
+/* ─── 2. SIDEBAR LAYOUT ─── */
+#wrapper {
+  display: flex;
+  width: 100%;
+  align-items: stretch;
+}
+
+#sidebar-wrapper {
+  min-height: 100vh;
+  width: 260px;
+  min-width: 260px;
+  background-color: #0f172a; /* Slate 900 */
+  transition: margin 0.3s ease-in-out;
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+  z-index: 1000;
+}
+
+#sidebar-wrapper .sidebar-heading {
+  padding: 1.5rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  letter-spacing: 0.5px;
+  display: flex;
+  align-items: center;
+  border-bottom: 1px solid #1e293b;
+}
+
+#sidebar-wrapper .list-group {
+  width: 100%;
+}
+
+#sidebar-wrapper .list-group-item {
+  border: none;
+  padding: 1rem 1.75rem;
+  background-color: transparent;
+  color: #94a3b8; /* Slate 400 */
+  font-weight: 500;
+  font-size: 0.95rem;
+  transition: all 0.2s ease;
+  border-left: 3px solid transparent;
+}
+
+#sidebar-wrapper .list-group-item i {
+  font-size: 1.1rem;
+  width: 24px;
+  text-align: center;
+}
+
+#sidebar-wrapper .list-group-item:hover,
+#sidebar-wrapper .list-group-item.active {
+  background-color: #1e293b; /* Slate 800 */
+  color: #fff;
+  border-left: 3px solid #3b82f6; /* Blue 500 */
+}
+
+#page-content-wrapper {
+  min-width: 0;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Sidebar Toggle Behavior */
+#sidebar-wrapper {
+  margin-left: -260px;
+}
+
+body.sb-sidenav-toggled #sidebar-wrapper {
+  margin-left: 0;
+}
+
+@media (min-width: 992px) {
+  #sidebar-wrapper {
+    margin-left: 0;
+  }
+  body.sb-sidenav-toggled #sidebar-wrapper {
+    margin-left: -260px;
+  }
+}
+
+/* ─── 3. TOP NAVIGATION ─── */
+.top-navbar {
+  background-color: #ffffff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 0.75rem 1.5rem;
+}
+
+#menu-toggle {
+  cursor: pointer;
+  color: #475569;
+  transition: color 0.2s;
+}
+
+#menu-toggle:hover {
+  color: #0f172a;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-role-badge {
+  background: #e0e7ff;
+  color: #4338ca;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 20px;
+  letter-spacing: 0.5px;
+}
+
+/* ─── 4. CARDS & WIDGETS ─── */
+.card {
+  border: none;
+  border-radius: 16px;
+  background: #ffffff;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  margin-bottom: 1.5rem;
+}
+
+.card:hover {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -4px rgba(0, 0, 0, 0.05);
+}
+
+.card-title {
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #1e293b;
+  margin-bottom: 1.25rem;
+}
+
+/* Dashboard Stat Cards */
+.stat-card {
+  padding: 1.5rem;
+  border-radius: 16px;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.stat-card::after {
+  content: '';
+  position: absolute;
+  top: -20px;
+  right: -20px;
+  width: 100px;
+  height: 100px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+}
+
+.bg-sales   { background: linear-gradient(135deg, #3b82f6, #2563eb); }
+.bg-stock   { background: linear-gradient(135deg, #10b981, #059669); }
+.bg-debts   { background: linear-gradient(135deg, #f59e0b, #d97706); }
+.bg-alerts  { background: linear-gradient(135deg, #ef4444, #dc2626); }
+
+.stat-card h6 {
+  font-size: 0.85rem;
+  font-weight: 500;
+  opacity: 0.9;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.stat-card h3 {
+  font-size: 2rem;
+  font-weight: 700;
+  margin: 10px 0 0 0;
+  color: white;
+}
+
+/* ─── 5. TABLES ─── */
+.table-responsive {
+  border-radius: 12px;
+}
+
+.table {
+  margin-bottom: 0;
+  color: #334155;
+  vertical-align: middle;
+}
+
+.table thead th {
+  background-color: #f8fafc;
+  color: #64748b;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 1rem;
+}
+
+.table tbody td {
+  padding: 1rem;
+  font-size: 0.875rem;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+/* ─── 6. BADGES ─── */
+.badge-status {
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.3px;
+}
+
+.status-paid      { background: #dcfce7; color: #166534; }
+.status-pending   { background: #fef9c3; color: #854d0e; }
+.status-overdue   { background: #fee2e2; color: #991b1b; }
+.status-draft     { background: #f1f5f9; color: #475569; }
+
+.in-stock  { background: #dcfce7; color: #166534; }
+.low-stock { background: #fef9c3; color: #854d0e; }
+.out-stock { background: #fee2e2; color: #991b1b; }
+
+.role-admin { background: #fee2e2; color: #991b1b; }
+.role-user { background: #e0e7ff; color: #4338ca; }
+
+/* ─── 7. BUTTONS & INPUTS ─── */
+.btn {
+  border-radius: 8px;
+  font-weight: 500;
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  transition: all 0.2s;
+}
+
+.btn-primary {
+  background-color: #3b82f6;
+  border-color: #3b82f6;
+}
+
+.btn-primary:hover {
+  background-color: #2563eb;
+  border-color: #2563eb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.3);
+}
+
+.btn-danger {
+  background-color: #ef4444;
+  border-color: #ef4444;
+}
+
+.form-control, .form-select {
+  border-radius: 8px;
+  border: 1px solid #cbd5e1;
+  padding: 0.6rem 1rem;
+  font-size: 0.875rem;
+  color: #334155;
+  background-color: #f8fafc;
+}
+
+.form-control:focus, .form-select:focus {
+  background-color: #ffffff;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+}
+
+.form-label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #475569;
+  margin-bottom: 0.4rem;
+}
+
+/* ─── 8. UTILITIES ─── */
+.page-header {
+  margin-bottom: 1.5rem;
+}
+
+.page-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1e293b;
+  margin: 0;
+}
+
+/* Login/Register Page Specifics */
+.auth-wrapper {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 2.5rem;
+}
+
+/* ─── 9. PRINT STYLES ─── */
+@media print {
+  #sidebar-wrapper, .top-navbar, .btn {
+    display: none !important;
+  }
+  #page-content-wrapper {
+    margin: 0 !important;
+    padding: 0 !important;
+    width: 100% !important;
+  }
+  body {
+    background: #fff !important;
+  }
+  .card {
+    box-shadow: none !important;
+    border: none !important;
+  }
+  .container-fluid {
+    padding: 0 !important;
+  }
+}
+.action-bar {
+    max-width: 800px;
+    margin: 0 auto 16px auto;
+    display: flex;
+    gap: 10px;
+    justify-content: flex-end;
+  }
+  .action-bar button {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    transition: opacity .2s;
+  }
+  .action-bar button:hover { opacity: 0.85; }
+  .btn-print {
+    background: #667eea;
+    color: white;
+  }
+  .btn-back {
+    background: #6c757d;
+    color: white;
+  }
+
+  /* Invoice container */
+  .invoice {
+    max-width: 800px;
+    margin: auto;
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+  }
+
+  /* Header */
+  .header {
+    text-align: center;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 28px 20px;
+  }
+  .header h2 {
+    font-size: 22px;
+    letter-spacing: 1px;
+    margin-bottom: 6px;
+  }
+  .header p {
+    font-size: 14px;
+    opacity: 0.9;
+  }
+
+  /* Customer info */
+  .customer-info {
+    padding: 20px 24px 8px 24px;
+  }
+  .customer-info h3 {
+    font-size: 14px;
+    color: #888;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 4px;
+  }
+  .customer-info p {
+    font-size: 17px;
+    font-weight: 600;
+    color: #333;
+  }
+
+  /* Items table */
+  .invoice-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 0 0;
+  }
+  .invoice-table thead {
+    background: #f8f9fa;
+  }
+  .invoice-table th {
+    padding: 12px 24px;
+    text-align: left;
+    font-size: 12px;
+    text-transform: uppercase;
+    color: #888;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #eee;
+  }
+  .invoice-table th:last-child,
+  .invoice-table td:last-child {
+    text-align: right;
+  }
+  .invoice-table td {
+    padding: 14px 24px;
+    font-size: 15px;
+    color: #333;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .invoice-table tbody tr:last-child td {
+    border-bottom: none;
+  }
+
+  /* Summary */
+  .summary {
+    padding: 20px 24px 28px 24px;
+    border-top: 2px solid #eee;
+    text-align: right;
+  }
+  .summary p {
+    font-size: 15px;
+    margin-bottom: 8px;
+    color: #555;
+  }
+  .summary p:last-child { margin-bottom: 0; }
+  .summary strong { color: #333; }
+
+  .overdue { color: #dc3545; font-weight: 700; }
+  .paid { color: #28a745; font-weight: 700; }
+  .pending { color: #fd7e14; font-weight: 700; }
+
+  .amount-highlight {
+    font-size: 20px;
+    margin-top: 8px;
+    padding-top: 10px;
+    border-top: 1px dashed #ccc;
+  }
+
+  /* Footer */
+  .invoice-footer {
+    text-align: center;
+    padding: 14px;
+    background: #f8f9fa;
+    font-size: 12px;
+    color: #aaa;
+  }
+
+  /* Print styles */
+  @media print {
+    body {
+      background: white;
+      padding: 0;
+    }
+    .action-bar { display: none !important; }
+    .invoice {
+      box-shadow: none;
+      border: none;
+      border-radius: 0;
+    }
+  }

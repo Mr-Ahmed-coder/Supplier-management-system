@@ -1,0 +1,12 @@
+{
+  "name": "supplier-management-system",
+  "version": "1.0.0",
+  "description": "Supplier, Inventory, Invoicing & Customer Debt Management System",
+  "scripts": {
+    "start": "node backend/server.js",
+    "build": "cd backend && npm install"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

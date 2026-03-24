@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Invoice Details</title>
+  <link rel="stylesheet" href="bootstrap-5.3.8-dist/css/bootstrap.min.css">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div id="wrapper">
+  <!-- Sidebar -->
+  <div id="sidebar-wrapper"></div>
+
+  <!-- Page Content -->
+  <div id="page-content-wrapper">
+    <nav class="top-navbar d-flex align-items-center justify-content-between shadow-sm">
+      <div class="d-flex align-items-center">
+        <i class="bi bi-list fs-3" id="menu-toggle"></i>
+        <h4 class="ms-3 m-0 page-title">Invoice Editor</h4>
+      </div>
+      <div class="user-info">
+        <span class="user-role-badge" id="userRoleBadge">User</span>
+        <span class="fw-semibold text-secondary" id="userNameLabel">Loading...</span>
+        <button class="btn btn-outline-danger btn-sm ms-3" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
+      </div>
+    </nav>
+    
+    <div class="container-fluid py-4 px-4">
+      
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+          <h3 class="fw-bold mb-1" id="pageHeaderTitle"> Supplier company</h3>
+          <p class="text-muted mb-0">Ensure billing accuracy</p>
+        </div>
+        <a href="invoice.html" class="btn btn-secondary">
+          <i class="bi bi-arrow-left me-1"></i> Back to Invoices
+        </a>
+      </div>
+
+      <div class="row">
+        <!-- Editor Card -->
+        <div class="col-lg-8">
+          <div class="card shadow-sm border-0">
+            <div class="card-body p-4">
+              <h5 class="card-title border-bottom pb-3 mb-4">Invoice Information</h5>
+              
+              <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                  <label class="form-label">Customer Name</label>
+                  <input type="text" class="form-control" id="customerName" required maxlength="100" placeholder="e.g. Acme Corp">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Amount ($)</label>
+                  <input type="number" class="form-control" id="invoiceAmount" min="0" step="0.01" required placeholder="0.00">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Date Issued</label>
+                  <input type="date" class="form-control" id="invoiceDate" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label">Status</label>
+                  <select class="form-select" id="invoiceStatus">
+                    <option value="Paid">Paid</option>
+                    <option selected value="Pending">Pending</option>
+                    <option value="Overdue">Overdue</option>
+                  </select>
+                </div>
+              </div>
+
+              <div class="d-flex justify-content-end border-top pt-4">
+                <a href="#" class="btn btn-secondary me-2" id="printInvoiceBtn" style="display:none;"><i class="bi bi-printer me-1"></i>Download PDF</a>
+                <button class="btn btn-danger me-2 admin-only" id="deleteInvoiceBtn" style="display:none;"><i class="bi bi-trash me-1"></i>Delete</button>
+                <button class="btn btn-primary px-4 shadow-sm" id="saveInvoice">Save Invoice</button>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Summary Panel -->
+        <div class="col-lg-4">
+          <div class="card bg-light border-0 shadow-sm mt-4 mt-lg-0">
+            <div class="card-body">
+              <!-- <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Tips</h6>
+              <p class="text-muted small mb-2">Ensure the customer name matches exactly if you want it to link to their profile.</p>
+              <p class="text-muted small">Amounts cannot be negative. Updates will be reflected in reports instantly.</p>
+            </div> -->
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+<script src="auth.js"></script>
+<script src="layout.js"></script>
+<script src="script.js"></script>
+
+<script>
+let customers = [];
+let editId = null;
+
+const params = new URLSearchParams(window.location.search);
+const queryId = params.get('id');
+
+const userStr = localStorage.getItem('user');
+const currentUser = userStr ? JSON.parse(userStr) : null;
+const isAdmin = currentUser && currentUser.role === 'Admin';
+
+async function fetchInitialData() {
+  try {
+    const custRes = await fetch(`${API_URL}/customers`, { headers: getAuthHeaders() });
+    customers = await custRes.json();
+
+    if (queryId) {
+      editId = queryId;
+      document.getElementById('pageHeaderTitle').innerText = 'Edit Invoice';
+      // Show print button with link to styled print page
+      const printBtn = document.getElementById('printInvoiceBtn');
+      printBtn.style.display = 'inline-block';
+      printBtn.href = `printinvoice.html?id=${editId}`;
+      if (isAdmin) {
+        document.getElementById('deleteInvoiceBtn').style.display = 'inline-block';
+      }
+
+      const invRes = await fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() });
+      const invoices = await invRes.json();
+      const inv = invoices.find(x => x._id === editId);
+      
+      if (inv) {
+        // Format date for the input
+        let dateVal = "";
+        if(inv.date) {
+            const d = new Date(inv.date);
+            if(!isNaN(d)) dateVal = d.toISOString().split('T')[0];
+        }
+        document.getElementById("customerName").value = inv.customerName || (inv.customer ? inv.customer.name : '');
+        document.getElementById("invoiceAmount").value = inv.amount;
+        document.getElementById("invoiceDate").value = dateVal;
+        document.getElementById("invoiceStatus").value = inv.status;
+      }
+    } else {
+        document.getElementById("invoiceDate").value = new Date().toISOString().split('T')[0];
+    }
+  } catch(err) { console.error(err); }
+}
+
+document.getElementById("saveInvoice").addEventListener("click", async function () {
+  const name = document.getElementById("customerName").value.trim();
+  const amount = parseFloat(document.getElementById("invoiceAmount").value);
+  const date = document.getElementById("invoiceDate").value;
+  const status = document.getElementById("invoiceStatus").value;
+
+  if (!name || isNaN(amount) || !date) return alert("Please fill all fields.");
+  if (amount < 0) return alert("Amount cannot be negative.");
+
+  const matchingCust = customers.find(c => c.name.toLowerCase() === name.toLowerCase());
+  const customerId = matchingCust ? matchingCust._id : null;
+
+  // Auto-generate invoice number for new invoices
+  let invoiceNumber = '';
+  if (editId) {
+    // When editing, get the existing invoice number
+    const existingInv = await fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() }).then(r => r.json());
+    const found = existingInv.find(x => x._id === editId);
+    invoiceNumber = found ? found.number : `INV-${Date.now()}`;
+  } else {
+    // Generate a unique invoice number: INV-YYYYMMDD-XXXXX
+    const now = new Date();
+    const dateStr = now.getFullYear().toString() +
+      String(now.getMonth() + 1).padStart(2, '0') +
+      String(now.getDate()).padStart(2, '0');
+    const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
+    invoiceNumber = `INV-${dateStr}-${rand}`;
+  }
+
+  const payload = {
+    number: invoiceNumber,
+    customer: customerId,
+    customerName: name,
+    amount, date, status
+  };
+
+  try {
+    let res;
+    if (editId) {
+      res = await fetch(`${API_URL}/invoices/${editId}`, {
+        method: 'PUT', headers: getAuthHeaders(), body: JSON.stringify(payload)
+      });
+    } else {
+      res = await fetch(`${API_URL}/invoices`, {
+        method: 'POST', headers: getAuthHeaders(), body: JSON.stringify(payload)
+      });
+    }
+
+    if (res.ok) {
+      window.location.href = "invoice.html";
+    } else {
+      const errData = await res.json().catch(() => ({}));
+      alert(errData.message || "Error saving invoice. Check permissions.");
+    }
+  } catch(err) { console.error(err); }
+});
+
+document.getElementById("deleteInvoiceBtn").addEventListener("click", async function() {
+    if(!editId) return;
+    if(confirm("Are you sure you want to delete this invoice?")) {
+        try {
+            const res = await fetch(`${API_URL}/invoices/${editId}`, { method: 'DELETE', headers: getAuthHeaders() });
+            if(res.ok) {
+                window.location.href = "invoice.html";
+            } else {
+                alert("Restricted: Admins only.");
+            }
+        } catch(err) { console.error(err); }
+    }
+});
+
+fetchInitialData();
+</script>
+</body>
+</html>
