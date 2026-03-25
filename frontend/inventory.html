@@ -33,11 +33,11 @@
       <!-- Header -->
       <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-          <h3 class="fw-bold mb-1">Products & Stock</h3>
-          <p class="text-muted mb-0">Manage product details and current inventory levels</p>
+          <h3 class="fw-bold mb-1">Cosmetics & Beauty Stock</h3>
+          <p class="text-muted mb-0">Manage cosmetic item details and current inventory levels</p>
         </div>
         <button class="btn btn-primary admin-only" data-bs-toggle="modal" data-bs-target="#productModal">
-          <i class="bi bi-plus-lg me-1"></i> Add Product
+          <i class="bi bi-plus-lg me-1"></i> Add Cosmetic Item
         </button>
       </div>
 
@@ -46,7 +46,7 @@
         <div class="col-md-3">
           <div class="card h-100 mb-0 shadow-sm border-0">
             <div class="card-body">
-              <span class="text-muted d-block mb-1 font-weight-bold" style="font-size: 0.85rem;">Total Products</span>
+              <span class="text-muted d-block mb-1 font-weight-bold" style="font-size: 0.85rem;">Total Cosmetics</span>
               <h3 id="totalProducts" class="m-0 text-primary">0</h3>
             </div>
           </div>
@@ -80,13 +80,13 @@
       <!-- Search & Table Card -->
       <div class="card shadow-sm">
         <div class="card-body">
-          <input type="text" id="searchProduct" class="form-control mb-4" placeholder="Search product by name or category...">
+          <input type="text" id="searchProduct" class="form-control mb-4" placeholder="Search cosmetic item by name or category...">
           
           <div class="table-responsive">
             <table class="table table-hover align-middle">
               <thead>
                 <tr>
-                  <th>Product Name</th>
+                  <th>Item Name</th>
                   <th>Category</th>
                   <th>Unit Price</th>
                   <th>Stock Qty</th>
@@ -111,21 +111,21 @@
   <div class="modal-dialog modal-dialog-centered">
     <div class="modal-content border-0 shadow">
       <div class="modal-header bg-primary text-white border-0">
-        <h5 class="modal-title fw-bold" id="productModalTitle">Add Product</h5>
+        <h5 class="modal-title fw-bold" id="productModalTitle">Add Cosmetic Item</h5>
         <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
       </div>
       <div class="modal-body p-4">
         <div class="mb-3">
-          <label class="form-label">Product Name</label>
-          <input type="text" id="productName" class="form-control" required maxlength="100" placeholder="e.g. Wireless Mouse">
+          <label class="form-label">Item Name</label>
+          <input type="text" id="productName" class="form-control" required maxlength="100" placeholder="e.g. Matte Lipstick">
         </div>
         <div class="mb-3">
           <label class="form-label">Category</label>
-          <input type="text" id="productCategory" class="form-control" maxlength="50" placeholder="e.g. Electronics">
+          <input type="text" id="productCategory" class="form-control" maxlength="50" placeholder="e.g. Skincare">
         </div>
         <div class="row">
           <div class="col-md-6 mb-3">
-            <label class="form-label">Unit Price ($)</label>
+            <label class="form-label">Unit Price (UGX)</label>
             <input type="number" id="productPrice" class="form-control" min="0" step="0.01" required value="0.00">
           </div>
           <div class="col-md-6 mb-3">
@@ -136,7 +136,7 @@
       </div>
       <div class="modal-footer border-0 pt-0 px-4 pb-4">
         <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-        <button class="btn btn-primary px-4" id="saveProduct">Save Product</button>
+        <button class="btn btn-primary px-4" id="saveProduct">Save Item</button>
       </div>
     </div>
   </div>
@@ -188,7 +188,7 @@ function renderProducts() {
       <tr>
         <td class="fw-semibold text-dark">${p.name}</td>
         <td>${p.category || '—'}</td>
-        <td class="fw-bold text-primary">$${Number(p.price).toFixed(2)}</td>
+        <td class="fw-bold text-primary">UGX ${Number(p.price).toLocaleString('en-US')}</td>
         <td>${p.stock}</td>
         <td><span class="badge-status ${statusClass}">${statusText}</span></td>
         <td>

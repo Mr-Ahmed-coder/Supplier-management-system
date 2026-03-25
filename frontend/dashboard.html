@@ -38,7 +38,7 @@
           <div class="col-xl-3 col-md-6">
             <div class="stat-card bg-sales shadow-sm">
               <h6>Total Sales Today</h6>
-              <h3 id="totalSales">$0.00</h3>
+              <h3 id="totalSales">UGX 0</h3>
             </div>
           </div>
           <div class="col-xl-3 col-md-6">
@@ -50,7 +50,7 @@
           <div class="col-xl-3 col-md-6">
             <div class="stat-card bg-debts shadow-sm">
               <h6>Outstanding Debts</h6>
-              <h3 id="outstandingDebts">$0.00</h3>
+              <h3 id="outstandingDebts">UGX 0</h3>
             </div>
           </div>
           <div class="col-xl-3 col-md-6">
@@ -102,27 +102,27 @@
                   <span class="fw-bold" id="dashInvoiceCount">0</span>
                 </div>
                 <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                  <span class="text-muted">Total Products</span>
+                  <span class="text-muted">Cosmetics Items</span>
                   <span class="fw-bold" id="dashProductCount">0</span>
                 </div>
                 <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
                   <span class="text-success fw-semibold">Paid</span>
-                  <span class="fw-bold text-success" id="dashPaidTotal">$0.00</span>
+                  <span class="fw-bold text-success" id="dashPaidTotal">UGX 0</span>
                 </div>
                 <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
                   <span class="text-warning fw-semibold">Pending</span>
-                  <span class="fw-bold text-warning" id="dashPendingTotal">$0.00</span>
+                  <span class="fw-bold text-warning" id="dashPendingTotal">UGX 0</span>
                 </div>
                 <div class="d-flex justify-content-between">
                   <span class="text-danger fw-semibold">Overdue</span>
-                  <span class="fw-bold text-danger" id="dashOverdueTotal">$0.00</span>
+                  <span class="fw-bold text-danger" id="dashOverdueTotal">UGX 0</span>
                 </div>
               </div>
             </div>
 
             <div class="card">
               <div class="card-body">
-                <h5 class="card-title">Stock Status</h5>
+                <h5 class="card-title">Beauty Stock Status</h5>
                 <div id="stockStatus">
                   <p class="text-center text-muted py-3">Loading stock...</p>
                 </div>
@@ -161,13 +161,13 @@ async function loadDashboardData() {
         if (!statsRes.ok) throw new Error('Failed to fetch dashboard stats');
         const stats = await statsRes.json();
 
-        document.getElementById("totalSales").innerText = `$${stats.totalSales.toFixed(2)}`;
-        document.getElementById("outstandingDebts").innerText = `$${stats.outstandingDebts.toFixed(2)}`;
+        document.getElementById("totalSales").innerText = `UGX ${Number(stats.totalSales).toLocaleString('en-US')}`;
+        document.getElementById("outstandingDebts").innerText = `UGX ${Number(stats.outstandingDebts).toLocaleString('en-US')}`;
         document.getElementById("dashInvoiceCount").innerText = stats.invoiceCount;
         document.getElementById("dashProductCount").innerText = stats.productCount;
-        document.getElementById("dashPaidTotal").innerText = `$${stats.paidTotal.toFixed(2)}`;
-        document.getElementById("dashPendingTotal").innerText = `$${stats.pendingTotal.toFixed(2)}`;
-        document.getElementById("dashOverdueTotal").innerText = `$${stats.overdueTotal.toFixed(2)}`;
+        document.getElementById("dashPaidTotal").innerText = `UGX ${Number(stats.paidTotal).toLocaleString('en-US')}`;
+        document.getElementById("dashPendingTotal").innerText = `UGX ${Number(stats.pendingTotal).toLocaleString('en-US')}`;
+        document.getElementById("dashOverdueTotal").innerText = `UGX ${Number(stats.overdueTotal).toLocaleString('en-US')}`;
         document.getElementById("lowStockAlerts").innerText = `${stats.lowStockAlerts} Items`;
         document.getElementById("alertCount").innerText = `${stats.lowStockAlerts + stats.outOfStockAlerts} Issues`;
 
@@ -201,7 +201,7 @@ async function loadDashboardData() {
       <tr>
         <td>${escapeHTML(inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString())}</td>
         <td class="fw-semibold text-dark">${escapeHTML(inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'))}</td>
-        <td class="fw-bold text-primary">$${escapeHTML(Number(inv.amount).toFixed(2))}</td>
+        <td class="fw-bold text-primary">UGX ${escapeHTML(Number(inv.amount).toLocaleString('en-US'))}</td>
         <td><span class="badge-status ${escapeHTML(badgeClass)}">${escapeHTML(inv.status)}</span></td>
       </tr>
     `;

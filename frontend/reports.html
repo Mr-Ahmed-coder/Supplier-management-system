@@ -36,7 +36,7 @@
         <div class="col-md-3">
           <div class="stat-card bg-sales shadow-sm">
             <h6>Total Revenue</h6>
-            <h3 id="reportRevenue">$0.00</h3>
+            <h3 id="reportRevenue">UGX 0</h3>
           </div>
         </div>
         <div class="col-md-3">
@@ -54,7 +54,7 @@
         <div class="col-md-3">
           <div class="stat-card bg-alerts shadow-sm">
             <h6>Total Overdue</h6>
-            <h3 id="reportOverdue">$0.00</h3>
+            <h3 id="reportOverdue">UGX 0</h3>
           </div>
         </div>
       </div>
@@ -197,10 +197,10 @@ function loadSummary() {
     if (inv.status === "Overdue") overdueAmount += amount;
   });
 
-  document.getElementById("reportRevenue").innerText = `$${totalRevenue.toFixed(2)}`;
+  document.getElementById("reportRevenue").innerText = `UGX ${Number(totalRevenue).toLocaleString('en-US')}`;
   document.getElementById("reportProducts").innerText = products.length;
   document.getElementById("reportCustomers").innerText = customers.length;
-  document.getElementById("reportOverdue").innerText = `$${overdueAmount.toFixed(2)}`;
+  document.getElementById("reportOverdue").innerText = `UGX ${Number(overdueAmount).toLocaleString('en-US')}`;
 }
 
 let statusChartObj, inventoryChartObj, revenueChartObj, stockHealthChartObj;
@@ -372,7 +372,7 @@ function renderTopCustomers() {
       <tr>
         <td class="text-muted">${i + 1}</td>
         <td class="fw-semibold text-dark">${name}</td>
-        <td class="fw-bold text-primary">$${data.total.toFixed(2)}</td>
+        <td class="fw-bold text-primary">UGX ${Number(data.total).toLocaleString('en-US')}</td>
         <td class="text-muted">${data.count}</td>
       </tr>
     `;
@@ -399,7 +399,7 @@ function renderTopProducts() {
         <td class="text-muted">${i + 1}</td>
         <td class="fw-semibold text-dark">${p.name}</td>
         <td class="text-muted"><span class="badge bg-light text-dark border">${p.stock}</span></td>
-        <td class="fw-bold text-success">$${p.value.toFixed(2)}</td>
+        <td class="fw-bold text-success">UGX ${Number(p.value).toLocaleString('en-US')}</td>
       </tr>
     `;
   });

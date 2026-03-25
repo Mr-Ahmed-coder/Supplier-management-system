@@ -101,7 +101,7 @@ function renderInvoices() {
         <td class="fw-semibold text-dark">${inv.number}</td>
         <td>${inv.customerName || (inv.customer ? inv.customer.name : 'Unknown')}</td>
         <td>${inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}</td>
-        <td class="fw-bold text-primary">$${Number(inv.amount).toFixed(2)}</td>
+        <td class="fw-bold text-primary">UGX ${Number(inv.amount).toLocaleString('en-US')}</td>
         <td><span class="badge-status ${badgeClass}">${inv.status}</span></td>
         <td>
           <button class="btn btn-sm btn-outline-primary me-1" onclick="window.location.href='createinvoice.html?id=${inv._id}'"><i class="bi bi-eye me-1"></i>View / Edit</button>

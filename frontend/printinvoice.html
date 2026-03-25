@@ -167,11 +167,11 @@
       else if (inv.status === 'Overdue') statusClass = 'overdue';
 
       summary.innerHTML = `
-        <p><strong>Subtotal:</strong> $${formatCurrency(subtotal)}</p>
-        ${totalPaid > 0 ? `<p class="paid"><strong>Cash Paid:</strong> $${formatCurrency(totalPaid)}</p>` : ''}
+        <p><strong>Subtotal:</strong> UGX ${formatCurrency(subtotal)}</p>
+        ${totalPaid > 0 ? `<p class="paid"><strong>Cash Paid:</strong> UGX ${formatCurrency(totalPaid)}</p>` : ''}
         <p class="amount-highlight ${statusClass}">
           <strong>${inv.status === 'Paid' ? 'Fully Paid' : 'Balance Due'}:</strong>
-          $${formatCurrency(balance > 0 ? balance : 0)}
+          UGX ${formatCurrency(balance > 0 ? balance : 0)}
         </p>
         <p style="margin-top:8px;font-size:13px;color:#aaa;">Status: <span class="${statusClass}" style="text-transform:uppercase;">${inv.status}</span></p>
       `;

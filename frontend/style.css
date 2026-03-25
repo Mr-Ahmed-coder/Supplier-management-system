@@ -383,3 +383,48 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 .amount-highlight { font-size: 24px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #d1d5db; color: #111827; font-weight: 800; }
 
 .invoice-footer { text-align: center; padding: 16px; background: #f9fafb; font-size: 13px; color: #9ca3af; font-weight: 500;}
+
+/* ─── 8. MOBILE RESPONSIVENESS ─── */
+@media (max-width: 991px) {
+  .top-navbar {
+    padding: 0.75rem 1rem;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  .page-title {
+    font-size: 1.15rem;
+  }
+  .container-fluid {
+    padding: 1rem !important;
+  }
+  .stat-card {
+    padding: 1.25rem;
+  }
+  .stat-card h3 {
+    font-size: 1.75rem;
+  }
+  .user-info {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .table-responsive {
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+    margin-bottom: 1rem;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+  }
+}
+
+@media (max-width: 576px) {
+  #sidebar-wrapper {
+    position: fixed;
+    height: 100vh;
+    z-index: 1050;
+  }
+  .user-role-badge {
+    display: none; /* Auto-hide on tiny screens to save space */
+  }
+  .action-bar {
+    justify-content: center;
+  }
+}
