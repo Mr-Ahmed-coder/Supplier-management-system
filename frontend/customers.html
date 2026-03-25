@@ -270,7 +270,7 @@ saveBtn.addEventListener("click", async function () {
     if (res.ok) {
       fetchCustomers();
       clearForm();
-      bootstrap.Modal.getInstance(document.getElementById("customerModal")).hide();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("customerModal")).hide();
     } else {
       alert("Error saving customer. Check permissions.");
     }

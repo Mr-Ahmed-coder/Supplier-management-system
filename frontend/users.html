@@ -123,6 +123,15 @@ function renderUsers() {
                         ${isSelf ? 'title="Cannot delete yourself" disabled' : `onclick="deleteUser('${u._id}', '${u.username}')" title="Delete User"`}>
                         <i class="bi bi-trash"></i> Revoke Access
                        </button>`;
+                       
+    let promoteBtn = '';
+    if (!isSelf) {
+      if (u.role === 'Admin') {
+        promoteBtn = `<button class="btn btn-sm btn-outline-warning ms-1" onclick="changeRole('${u._id}', '${u.username}', 'User')" title="Demote to User"><i class="bi bi-arrow-down-circle"></i> Demote</button>`;
+      } else {
+        promoteBtn = `<button class="btn btn-sm btn-outline-success ms-1" onclick="changeRole('${u._id}', '${u.username}', 'Admin')" title="Promote to Admin"><i class="bi bi-arrow-up-circle"></i> Promote</button>`;
+      }
+    }
 
     table.innerHTML += `
       <tr>
@@ -132,6 +141,7 @@ function renderUsers() {
         <td class="text-muted"><small>${new Date(u.createdAt).toLocaleString()}</small></td>
         <td>
           ${deleteBtn}
+          ${promoteBtn}
         </td>
       </tr>
     `;
@@ -142,6 +152,23 @@ async function deleteUser(id, username) {
   if (confirm(`Are you absolutely sure you want to permanently revoke access for ${username}?`)) {
     try {
       const res = await fetch(`${API_URL}/users/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
+      if(res.ok) {
+        fetchUsers();
+      } else {
+        alert("Action restricted or failed.");
+      }
+    } catch(err) { console.error(err); }
+  }
+}
+
+async function changeRole(id, username, newRole) {
+  if (confirm(`Are you sure you want to change ${username}'s role to ${newRole}?`)) {
+    try {
+      const res = await fetch(`${API_URL}/users/${id}/role`, { 
+        method: 'PUT', 
+        headers: getAuthHeaders(),
+        body: JSON.stringify({ role: newRole })
+      });
       if(res.ok) {
         fetchUsers();
       } else {

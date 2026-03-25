@@ -181,7 +181,7 @@ saveBtn.addEventListener("click", async function () {
     if (res.ok) {
       fetchSuppliers();
       clearForm();
-      bootstrap.Modal.getInstance(document.getElementById("supplierModal")).hide();
+      bootstrap.Modal.getOrCreateInstance(document.getElementById("supplierModal")).hide();
     } else {
       alert("Error saving supplier. Check permissions.");
     }

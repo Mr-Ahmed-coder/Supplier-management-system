@@ -9,7 +9,7 @@ const generateToken = (id) => {
 // @route   POST /api/users
 // @access  Public
 const registerUser = async (req, res) => {
-  const { username, email, password, role } = req.body;
+  const { username, email, password } = req.body;
   if (!username || !email || !password) {
     return res.status(400).json({ message: 'Please add all fields' });
   }
@@ -19,7 +19,7 @@ const registerUser = async (req, res) => {
     return res.status(400).json({ message: 'User already exists' });
   }
 
-  const user = await User.create({ username, email, password, role });
+  const user = await User.create({ username, email, password });
   if (user) {
     res.status(201).json({
       _id: user.id, username: user.username, email: user.email, role: user.role,
@@ -88,4 +88,24 @@ const deleteUser = async (req, res, next) => {
   }
 };
 
-module.exports = { registerUser, loginUser, getMe, getUsers, deleteUser };
+// @desc    Update user role
+// @route   PUT /api/users/:id/role
+// @access  Private/Admin
+const updateUserRole = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user) {
+      res.status(404);
+      throw new Error('User not found');
+    }
+    
+    user.role = req.body.role || 'User';
+    const updatedUser = await user.save();
+    
+    res.json({ message: 'User role updated', role: updatedUser.role });
+  } catch (error) {
+    next(error);
+  }
+};
+
+module.exports = { registerUser, loginUser, getMe, getUsers, deleteUser, updateUserRole };

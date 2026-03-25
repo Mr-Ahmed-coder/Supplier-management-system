@@ -43,14 +43,7 @@
         </div>
       </div>
       
-      <div class="mb-4 bg-light p-3 rounded border">
-        <label class="form-label fw-bold text-dark mb-2 d-block border-bottom pb-2">Account Type</label>
-        <div class="form-check form-switch mt-2">
-          <input class="form-check-input mt-1" type="checkbox" role="switch" id="isAdminRole">
-          <label class="form-check-label ps-1 text-secondary" for="isAdminRole">Request <strong class="text-danger">Admin</strong> Privileges</label>
-        </div>
-        <small class="text-muted d-block mt-2" style="font-size: 0.75rem;"><i class="bi bi-info-circle me-1"></i>Admins have full write/delete access across all modules.</small>
-      </div>
+      <!-- Role selection removed for security -->
       
       <div id="errorMsg" class="alert alert-danger px-3 py-2 small mb-3" style="display:none; border-left: 4px solid #dc3545;"><i class="bi bi-exclamation-circle me-2"></i><span id="errorText"></span></div>
       <div id="successMsg" class="alert alert-success px-3 py-2 small mb-3" style="display:none; border-left: 4px solid #198754;"><i class="bi bi-check-circle me-2"></i><span id="successText"></span></div>
@@ -70,8 +63,6 @@
     const username = document.getElementById('name').value;
     const email = document.getElementById('email').value;
     const password = document.getElementById('password').value;
-    // Map checkbox to the exact new schema ENUMs
-    const role = document.getElementById('isAdminRole').checked ? 'Admin' : 'User';
     
     const errorMsg = document.getElementById('errorMsg');
     const errorText = document.getElementById('errorText');
@@ -85,7 +76,7 @@
       const res = await fetch('/api/users/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, email, password, role })
+        body: JSON.stringify({ username, email, password })
       });
       const data = await res.json();
       

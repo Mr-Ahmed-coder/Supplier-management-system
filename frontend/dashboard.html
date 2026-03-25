@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -8,176 +9,195 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet">
   <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
 
-<div id="wrapper">
-  <!-- Sidebar -->
-  <div id="sidebar-wrapper"></div>
+  <div id="wrapper">
+    <!-- Sidebar -->
+    <div id="sidebar-wrapper"></div>
 
-  <!-- Page Content -->
-  <div id="page-content-wrapper">
-    <nav class="top-navbar d-flex align-items-center justify-content-between shadow-sm">
-      <div class="d-flex align-items-center">
-        <i class="bi bi-list fs-3" id="menu-toggle"></i>
-        <h4 class="ms-3 m-0 page-title">Dashboard Overview</h4>
-      </div>
-      <div class="user-info">
-        <span class="user-role-badge" id="userRoleBadge">User</span>
-        <span class="fw-semibold text-secondary" id="userNameLabel">Loading...</span>
-        <button class="btn btn-outline-danger btn-sm ms-3" id="logoutBtn"><i class="bi bi-box-arrow-right"></i> Logout</button>
-      </div>
-    </nav>
-    
-    <div class="container-fluid py-4 px-4">
-      
-      <!-- Stats Row -->
-      <div class="row g-4 mb-4">
-        <div class="col-xl-3 col-md-6">
-          <div class="stat-card bg-sales shadow-sm">
-            <h6>Total Sales Today</h6>
-            <h3 id="totalSales">$0.00</h3>
-          </div>
+    <!-- Page Content -->
+    <div id="page-content-wrapper">
+      <nav class="top-navbar d-flex align-items-center justify-content-between shadow-sm">
+        <div class="d-flex align-items-center">
+          <i class="bi bi-list fs-3" id="menu-toggle"></i>
+          <h4 class="ms-3 m-0 page-title">Dashboard Overview</h4>
         </div>
-        <div class="col-xl-3 col-md-6">
-          <div class="stat-card bg-stock shadow-sm">
-            <h6>Low Stock Alerts</h6>
-            <h3 id="lowStockAlerts">0 Items</h3>
-          </div>
+        <div class="user-info">
+          <span class="user-role-badge" id="userRoleBadge">User</span>
+          <span class="fw-semibold text-secondary" id="userNameLabel">Loading...</span>
+          <button class="btn btn-outline-danger btn-sm ms-3" id="logoutBtn"><i class="bi bi-box-arrow-right"></i>
+            Logout</button>
         </div>
-        <div class="col-xl-3 col-md-6">
-          <div class="stat-card bg-debts shadow-sm">
-            <h6>Outstanding Debts</h6>
-            <h3 id="outstandingDebts">$0.00</h3>
-          </div>
-        </div>
-        <div class="col-xl-3 col-md-6">
-          <div class="stat-card bg-alerts shadow-sm">
-            <h6>Alerts & Warnings</h6>
-            <h3 id="alertCount">0 Issues</h3>
-          </div>
-        </div>
-      </div>
+      </nav>
 
-      <!-- Main Content Row -->
-      <div class="row g-4">
-        <!-- Recent Transactions -->
-        <div class="col-lg-8">
-          <div class="card h-100">
-            <div class="card-body">
-              <div class="d-flex justify-content-between align-items-center mb-3">
-                <h5 class="card-title m-0">Recent Transactions</h5>
-                <a href="invoice.html" class="btn btn-sm btn-outline-primary">View All</a>
+      <div class="container-fluid py-4 px-4">
+
+        <!-- Stats Row -->
+        <div class="row g-4 mb-4">
+          <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-sales shadow-sm">
+              <h6>Total Sales Today</h6>
+              <h3 id="totalSales">$0.00</h3>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-stock shadow-sm">
+              <h6>Low Stock Alerts</h6>
+              <h3 id="lowStockAlerts">0 Items</h3>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-debts shadow-sm">
+              <h6>Outstanding Debts</h6>
+              <h3 id="outstandingDebts">$0.00</h3>
+            </div>
+          </div>
+          <div class="col-xl-3 col-md-6">
+            <div class="stat-card bg-alerts shadow-sm">
+              <h6>Alerts & Warnings</h6>
+              <h3 id="alertCount">0 Issues</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Main Content Row -->
+        <div class="row g-4">
+          <!-- Recent Transactions -->
+          <div class="col-lg-8">
+            <div class="card h-100">
+              <div class="card-body">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                  <h5 class="card-title m-0">Recent Transactions</h5>
+                  <a href="invoice.html" class="btn btn-sm btn-outline-primary">View All transactions</a>
+                </div>
+                <div class="table-responsive">
+                  <table class="table table-hover">
+                    <thead>
+                      <tr>
+                        <th>Date</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody id="recentTransactions">
+                      <tr>
+                        <td colspan="4" class="text-center text-muted py-4">Loading transactions...</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
               </div>
-              <div class="table-responsive">
-                <table class="table table-hover">
-                  <thead>
-                    <tr>
-                      <th>Date</th>
-                      <th>Customer</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                    </tr>
-                  </thead>
-                  <tbody id="recentTransactions">
-                    <tr><td colspan="4" class="text-center text-muted py-4">Loading transactions...</td></tr>
-                  </tbody>
-                </table>
+            </div>
+          </div>
+
+          <!-- Right Column Panel -->
+          <div class="col-lg-4">
+            <div class="card mb-4">
+              <div class="card-body">
+                <h5 class="card-title">Quick Summary</h5>
+                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                  <span class="text-muted">Total Invoices</span>
+                  <span class="fw-bold" id="dashInvoiceCount">0</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                  <span class="text-muted">Total Products</span>
+                  <span class="fw-bold" id="dashProductCount">0</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                  <span class="text-success fw-semibold">Paid</span>
+                  <span class="fw-bold text-success" id="dashPaidTotal">$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                  <span class="text-warning fw-semibold">Pending</span>
+                  <span class="fw-bold text-warning" id="dashPendingTotal">$0.00</span>
+                </div>
+                <div class="d-flex justify-content-between">
+                  <span class="text-danger fw-semibold">Overdue</span>
+                  <span class="fw-bold text-danger" id="dashOverdueTotal">$0.00</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title">Stock Status</h5>
+                <div id="stockStatus">
+                  <p class="text-center text-muted py-3">Loading stock...</p>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- Right Column Panel -->
-        <div class="col-lg-4">
-          <div class="card mb-4">
-            <div class="card-body">
-              <h5 class="card-title">Quick Summary</h5>
-              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                <span class="text-muted">Total Invoices</span>
-                <span class="fw-bold" id="dashInvoiceCount">0</span>
-              </div>
-              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                <span class="text-muted">Total Products</span>
-                <span class="fw-bold" id="dashProductCount">0</span>
-              </div>
-              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                <span class="text-success fw-semibold">Paid</span>
-                <span class="fw-bold text-success" id="dashPaidTotal">$0.00</span>
-              </div>
-              <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                <span class="text-warning fw-semibold">Pending</span>
-                <span class="fw-bold text-warning" id="dashPendingTotal">$0.00</span>
-              </div>
-              <div class="d-flex justify-content-between">
-                <span class="text-danger fw-semibold">Overdue</span>
-                <span class="fw-bold text-danger" id="dashOverdueTotal">$0.00</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="card">
-            <div class="card-body">
-              <h5 class="card-title">Stock Status</h5>
-              <div id="stockStatus">
-                <p class="text-center text-muted py-3">Loading stock...</p>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
-
     </div>
   </div>
-</div>
 
-<script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
-<script src="auth.js"></script>
-<script src="layout.js"></script>
-<script src="script.js"></script>
-<script>
-async function loadDashboardData() {
-  try {
-    const statsRes = await fetch(`${API_URL}/dashboard`, { headers: getAuthHeaders() });
-    if (!statsRes.ok) throw new Error('Failed to fetch dashboard stats');
-    const stats = await statsRes.json();
-    
-    document.getElementById("totalSales").innerText = `$${stats.totalSales.toFixed(2)}`;
-    document.getElementById("outstandingDebts").innerText = `$${stats.outstandingDebts.toFixed(2)}`;
-    document.getElementById("dashInvoiceCount").innerText = stats.invoiceCount;
-    document.getElementById("dashProductCount").innerText = stats.productCount;
-    document.getElementById("dashPaidTotal").innerText = `$${stats.paidTotal.toFixed(2)}`;
-    document.getElementById("dashPendingTotal").innerText = `$${stats.pendingTotal.toFixed(2)}`;
-    document.getElementById("dashOverdueTotal").innerText = `$${stats.overdueTotal.toFixed(2)}`;
-    document.getElementById("lowStockAlerts").innerText = `${stats.lowStockAlerts} Items`;
-    document.getElementById("alertCount").innerText = `${stats.lowStockAlerts + stats.outOfStockAlerts} Issues`;
+  <script src="bootstrap-5.3.8-dist/js/bootstrap.bundle.min.js"></script>
+  <script src="auth.js"></script>
+  <script src="layout.js"></script>
+  <script src="script.js"></script>
+  <script>
+const userStr = localStorage.getItem('user');
+const currentUser = userStr ? JSON.parse(userStr) : null;
 
-    const [prodRes, invRes] = await Promise.all([
-      fetch(`${API_URL}/products`, { headers: getAuthHeaders() }),
-      fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() })
-    ]);
-    const products = await prodRes.json();
-    const invoices = await invRes.json();
-
-    loadStockStatus(products);
-    loadRecentTransactions(invoices);
-  } catch (err) {
-    console.error(err);
-  }
+if (!currentUser || currentUser.role !== 'Admin') {
+  document.querySelector('.container-fluid').innerHTML = 
+    `<div class="alert alert-danger mx-auto mt-5 shadow-sm" style="max-width:500px">
+        <h4 class="alert-heading fw-bold"><i class="bi bi-shield-lock-fill text-danger me-2"></i> Access Denied</h4>
+        <p>Your user role does not have permission to view the system dashboard and analytics.</p>
+        <hr>
+        <a href="inventory.html" class="btn btn-outline-danger w-100">Go to Inventory</a>
+    </div>`;
+} else {
+  loadDashboardData();
 }
 
-function loadRecentTransactions(invoices) {
-  const tbody = document.getElementById("recentTransactions");
-  if (!invoices || invoices.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No invoices yet</td></tr>`;
-    return;
-  }
-  const recent = invoices.slice(-5).reverse();
-  tbody.innerHTML = "";
-  recent.forEach(inv => {
-    const badgeClass =
-      inv.status === "Paid" ? "status-paid" :
-      inv.status === "Pending" ? "status-pending" : "status-overdue";
-    tbody.innerHTML += `
+async function loadDashboardData() {
+  try {
+        const statsRes = await fetch(`${API_URL}/dashboard`, { headers: getAuthHeaders() });
+        if (!statsRes.ok) throw new Error('Failed to fetch dashboard stats');
+        const stats = await statsRes.json();
+
+        document.getElementById("totalSales").innerText = `$${stats.totalSales.toFixed(2)}`;
+        document.getElementById("outstandingDebts").innerText = `$${stats.outstandingDebts.toFixed(2)}`;
+        document.getElementById("dashInvoiceCount").innerText = stats.invoiceCount;
+        document.getElementById("dashProductCount").innerText = stats.productCount;
+        document.getElementById("dashPaidTotal").innerText = `$${stats.paidTotal.toFixed(2)}`;
+        document.getElementById("dashPendingTotal").innerText = `$${stats.pendingTotal.toFixed(2)}`;
+        document.getElementById("dashOverdueTotal").innerText = `$${stats.overdueTotal.toFixed(2)}`;
+        document.getElementById("lowStockAlerts").innerText = `${stats.lowStockAlerts} Items`;
+        document.getElementById("alertCount").innerText = `${stats.lowStockAlerts + stats.outOfStockAlerts} Issues`;
+
+        const [prodRes, invRes] = await Promise.all([
+          fetch(`${API_URL}/products`, { headers: getAuthHeaders() }),
+          fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() })
+        ]);
+        const products = await prodRes.json();
+        const invoices = await invRes.json();
+
+        loadStockStatus(products);
+        loadRecentTransactions(invoices);
+      } catch (err) {
+        console.error(err);
+      }
+    }
+
+    function loadRecentTransactions(invoices) {
+      const tbody = document.getElementById("recentTransactions");
+      if (!invoices || invoices.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="4" class="text-center text-muted py-4">No invoices yet</td></tr>`;
+        return;
+      }
+      const recent = invoices.slice(-5).reverse();
+      tbody.innerHTML = "";
+      recent.forEach(inv => {
+        const badgeClass =
+          inv.status === "Paid" ? "status-paid" :
+            inv.status === "Pending" ? "status-pending" : "status-overdue";
+        tbody.innerHTML += `
       <tr>
         <td>${escapeHTML(inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString())}</td>
         <td class="fw-semibold text-dark">${escapeHTML(inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'))}</td>
@@ -185,28 +205,27 @@ function loadRecentTransactions(invoices) {
         <td><span class="badge-status ${escapeHTML(badgeClass)}">${escapeHTML(inv.status)}</span></td>
       </tr>
     `;
-  });
-}
+      });
+    }
 
-function loadStockStatus(products) {
-  const container = document.getElementById("stockStatus");
-  if (!products || products.length === 0) {
-    container.innerHTML = `<p class="text-center text-muted py-3">No products yet</p>`;
-    return;
-  }
-  container.innerHTML = "";
-  const display = products.slice(0, 5);
-  display.forEach(p => {
-    let colorClass = p.stock === 0 ? "text-danger" : p.stock <= 10 ? "text-warning" : "text-success";
-    let label = p.stock === 0 ? "Out of Stock" : p.stock <= 10 ? "Low Stock" : `${p.stock} Units`;
-    container.innerHTML += `<div class="d-flex justify-content-between border-bottom pb-2 mb-2 last-border-none">
+    function loadStockStatus(products) {
+      const container = document.getElementById("stockStatus");
+      if (!products || products.length === 0) {
+        container.innerHTML = `<p class="text-center text-muted py-3">No products yet</p>`;
+        return;
+      }
+      container.innerHTML = "";
+      const display = products.slice(0, 5);
+      display.forEach(p => {
+        let colorClass = p.stock === 0 ? "text-danger" : p.stock <= 10 ? "text-warning" : "text-success";
+        let label = p.stock === 0 ? "Out of Stock" : p.stock <= 10 ? "Low Stock" : `${p.stock} Units`;
+        container.innerHTML += `<div class="d-flex justify-content-between border-bottom pb-2 mb-2 last-border-none">
       <span class="${escapeHTML(colorClass)} fw-semibold"><i class="bi bi-circle-fill me-2" style="font-size:8px;"></i>${escapeHTML(p.name)}</span>
       <span class="text-muted">${escapeHTML(label)}</span>
     </div>`;
-  });
-}
-
-loadDashboardData();
-</script>
+      });
+    }
+  </script>
 </body>
+
 </html>

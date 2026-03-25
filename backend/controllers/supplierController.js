@@ -5,28 +5,46 @@ const getSuppliers = async (req, res) => {
   res.json(suppliers);
 };
 
-const createSupplier = async (req, res) => {
-  const { name, email, phone, company, balance } = req.body;
-  if (!name) return res.status(400).json({ message: 'Name is required' });
-
-  const supplier = await Supplier.create({ name, email, phone, company, balance });
-  res.status(201).json(supplier);
+const createSupplier = async (req, res, next) => {
+  try {
+    const { name, email, phone, company, balance } = req.body;
+    if (!name || name.trim() === '') {
+      res.status(400);
+      throw new Error('Name is required');
+    }
+    const supplier = await Supplier.create({ name, email, phone, company, balance });
+    res.status(201).json(supplier);
+  } catch (error) {
+    next(error);
+  }
 };
 
-const updateSupplier = async (req, res) => {
-  const supplier = await Supplier.findById(req.params.id);
-  if (!supplier) return res.status(404).json({ message: 'Supplier not found' });
-
-  const updatedSupplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
-  res.json(updatedSupplier);
+const updateSupplier = async (req, res, next) => {
+  try {
+    const supplier = await Supplier.findById(req.params.id);
+    if (!supplier) {
+      res.status(404);
+      throw new Error('Supplier not found');
+    }
+    const updatedSupplier = await Supplier.findByIdAndUpdate(req.params.id, req.body, { new: true });
+    res.json(updatedSupplier);
+  } catch (error) {
+    next(error);
+  }
 };
 
-const deleteSupplier = async (req, res) => {
-  const supplier = await Supplier.findById(req.params.id);
-  if (!supplier) return res.status(404).json({ message: 'Supplier not found' });
-
-  await supplier.deleteOne();
-  res.json({ message: 'Supplier removed' });
+const deleteSupplier = async (req, res, next) => {
+  try {
+    const supplier = await Supplier.findById(req.params.id);
+    if (!supplier) {
+      res.status(404);
+      throw new Error('Supplier not found');
+    }
+    await supplier.deleteOne();
+    res.json({ message: 'Supplier removed' });
+  } catch (error) {
+    next(error);
+  }
 };
 
 module.exports = { getSuppliers, createSupplier, updateSupplier, deleteSupplier };
