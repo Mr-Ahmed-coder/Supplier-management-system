@@ -13,6 +13,11 @@ const sidebarHTML = `
   </div>
 `;
 
+// Apply theme immediately to prevent white flashing (script is at bottom of body)
+if (localStorage.getItem('theme') === 'dark') {
+    document.body.classList.add('dark');
+}
+
 document.addEventListener("DOMContentLoaded", () => {
     const sidebarWrapper = document.getElementById("sidebar-wrapper");
     if (sidebarWrapper) {
@@ -31,6 +36,40 @@ document.addEventListener("DOMContentLoaded", () => {
         const activeLink = document.getElementById(navId);
         if (activeLink) {
             activeLink.classList.add("active");
+        }
+    }
+
+    // Inject Theme Toggle Button dynamically
+    const userInfo = document.querySelector('.user-info');
+    if (userInfo) {
+        const themeBtn = document.createElement('button');
+        themeBtn.id = 'themeToggleBtn';
+        themeBtn.className = 'btn btn-outline-secondary btn-sm ms-3 d-flex align-items-center justify-content-center';
+        themeBtn.style.width = '32px';
+        themeBtn.style.height = '32px';
+        themeBtn.style.padding = '0';
+        themeBtn.style.borderRadius = '8px';
+
+        const setBtnIcon = (isDark) => {
+            themeBtn.innerHTML = isDark ? '<i class="bi bi-moon-fill"></i>' : '<i class="bi bi-brightness-high-fill" style="color:#eab308;"></i>';
+            themeBtn.className = isDark ? 'btn btn-outline-light btn-sm ms-3' : 'btn btn-outline-secondary btn-sm ms-3';
+            themeBtn.style.width = '32px'; themeBtn.style.height = '32px'; themeBtn.style.padding = '0'; themeBtn.style.borderRadius = '8px';
+        };
+
+        const currentDark = document.body.classList.contains('dark');
+        setBtnIcon(currentDark);
+
+        themeBtn.addEventListener('click', () => {
+            const isDarkNow = document.body.classList.toggle('dark');
+            localStorage.setItem('theme', isDarkNow ? 'dark' : 'light');
+            setBtnIcon(isDarkNow);
+        });
+
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            userInfo.insertBefore(themeBtn, logoutBtn);
+        } else {
+            userInfo.appendChild(themeBtn);
         }
     }
 });

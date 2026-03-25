@@ -5,23 +5,69 @@
 /* ─── 1. BASE AND TYPOGRAPHY ─── */
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
 
+:root {
+  --bg-color: #f3f4f6;
+  --text-main: #374151;
+  --text-heading: #111827;
+  --text-muted: #6b7280;
+  --card-bg: #ffffff;
+  --border-color: #e5e7eb;
+  --sidebar-bg: #ffffff;
+  --sidebar-hover: #eff6ff;
+  --sidebar-hover-text: #2563eb;
+  --nav-bg: rgba(255, 255, 255, 0.8);
+  --table-head-bg: #f9fafb;
+  --table-row-hover: #f9fafb;
+  --table-border: #f3f4f6;
+  --input-bg: #f9fafb;
+  --input-border: #d1d5db;
+}
+
+body.dark {
+  --bg-color: #0f172a;
+  --text-main: #cbd5e1;
+  --text-heading: #f8fafc;
+  --text-muted: #94a3b8;
+  --card-bg: #1e293b;
+  --border-color: #334155;
+  --sidebar-bg: #1e293b;
+  --sidebar-hover: #334155;
+  --sidebar-hover-text: #60a5fa;
+  --nav-bg: rgba(30, 41, 59, 0.8);
+  --table-head-bg: #0f172a;
+  --table-row-hover: #334155;
+  --table-border: #334155;
+  --input-bg: #0f172a;
+  --input-border: #475569;
+}
+
+body.dark .text-dark { color: var(--text-heading) !important; }
+body.dark .bg-light { background-color: var(--sidebar-hover) !important; }
+body.dark .table { color: var(--text-main); }
+body.dark .modal-content, body.dark .modal-header, body.dark .modal-footer { 
+  background-color: var(--card-bg); 
+  color: var(--text-main); 
+  border-color: var(--border-color); 
+}
+body.dark .btn-close { filter: invert(1) grayscale(100%) brightness(200%); }
+
 body {
   margin: 0;
-  background-color: #f3f4f6; /* Modern cool gray */
+  background-color: var(--bg-color); /* Dark mode supported */
   font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-  color: #374151; /* Gray 700 */
+  color: var(--text-main);
   overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
 h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
-  color: #111827; /* Gray 900 */
+  color: var(--text-heading);
   letter-spacing: -0.02em;
 }
 
 .text-muted {
-  color: #6b7280 !important; /* Gray 500 */
+  color: var(--text-muted) !important;
 }
 
 /* ─── 2. SIDEBAR LAYOUT ─── */
@@ -35,22 +81,22 @@ h1, h2, h3, h4, h5, h6 {
   min-height: 100vh;
   width: 270px;
   min-width: 270px;
-  background-color: #ffffff;
+  background-color: var(--sidebar-bg);
   transition: margin 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   box-shadow: 1px 0 10px rgba(0,0,0,0.03);
   z-index: 1000;
-  border-right: 1px solid #e5e7eb;
+  border-right: 1px solid var(--border-color);
 }
 
 #sidebar-wrapper .sidebar-heading {
   padding: 1.75rem 1.5rem;
   font-size: 1.2rem;
   font-weight: 800;
-  color: #111827;
+  color: var(--text-heading);
   letter-spacing: -0.5px;
   display: flex;
   align-items: center;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--border-color);
 }
 
 #sidebar-wrapper .sidebar-heading i {
@@ -68,7 +114,7 @@ h1, h2, h3, h4, h5, h6 {
   margin-bottom: 0.25rem;
   border-radius: 10px;
   background-color: transparent;
-  color: #4b5563; /* Gray 600 */
+  color: var(--text-main);
   font-weight: 600;
   font-size: 0.95rem;
   transition: all 0.25s ease;
@@ -85,8 +131,8 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 #sidebar-wrapper .list-group-item:hover {
-  background-color: #eff6ff; /* Blue 50 */
-  color: #2563eb;
+  background-color: var(--sidebar-hover);
+  color: var(--sidebar-hover-text);
   transform: translateX(3px);
 }
 
@@ -117,10 +163,10 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 
 /* ─── 3. TOP NAVIGATION ─── */
 .top-navbar {
-  background-color: rgba(255, 255, 255, 0.8);
+  background-color: var(--nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   padding: 1rem 1.75rem;
   position: sticky;
   top: 0;
@@ -129,15 +175,15 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 
 #menu-toggle {
   cursor: pointer;
-  color: #4b5563;
+  color: var(--text-muted);
   transition: all 0.2s;
-  background: #f3f4f6;
+  background: var(--input-bg);
   padding: 6px;
   border-radius: 8px;
 }
 #menu-toggle:hover {
-  color: #111827;
-  background: #e5e7eb;
+  color: var(--text-heading);
+  background: var(--border-color);
 }
 
 .user-info {
@@ -158,9 +204,9 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 
 /* ─── 4. CARDS & WIDGETS ─── */
 .card {
-  border: 1px solid rgba(229, 231, 235, 0.5);
+  border: 1px solid var(--border-color);
   border-radius: 16px;
-  background: #ffffff;
+  background: var(--card-bg);
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
   transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s;
   margin-bottom: 1.5rem;
@@ -174,7 +220,7 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 .card-title {
   font-size: 1.15rem;
   font-weight: 700;
-  color: #111827;
+  color: var(--text-heading);
   margin-bottom: 1.25rem;
 }
 
@@ -232,27 +278,27 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 }
 
 .table thead th {
-  background-color: #f9fafb;
-  color: #6b7280;
+  background-color: var(--table-head-bg);
+  color: var(--text-muted);
   font-size: 0.75rem;
   font-weight: 700;
   text-transform: uppercase;
   letter-spacing: 0.8px;
-  border-bottom: 1px solid #e5e7eb;
+  border-bottom: 1px solid var(--border-color);
   padding: 1.25rem 1rem;
 }
 
 .table tbody td {
   padding: 1.25rem 1rem;
   font-size: 0.9rem;
-  border-bottom: 1px solid #f3f4f6;
+  border-bottom: 1px solid var(--table-border);
   font-weight: 500;
 }
 
 .table tbody tr {
   transition: background-color 0.2s;
 }
-.table tbody tr:hover { background-color: #f9fafb; cursor: pointer; }
+.table tbody tr:hover { background-color: var(--table-row-hover); cursor: pointer; }
 
 /* ─── 6. BADGES ─── */
 .badge-status {
@@ -303,16 +349,16 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 
 .form-control, .form-select {
   border-radius: 10px;
-  border: 1px solid #d1d5db;
+  border: 1px solid var(--input-border);
   padding: 0.75rem 1rem;
   font-size: 0.9rem;
-  color: #111827;
-  background-color: #f9fafb;
+  color: var(--text-heading);
+  background-color: var(--input-bg);
   transition: all 0.2s;
 }
 
 .form-control:focus, .form-select:focus {
-  background-color: #ffffff;
+  background-color: var(--bg-color);
   border-color: #3b82f6;
   box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.1);
 }
@@ -320,7 +366,7 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 .form-label {
   font-size: 0.85rem;
   font-weight: 600;
-  color: #374151;
+  color: var(--text-main);
   margin-bottom: 0.5rem;
 }
 
@@ -372,17 +418,17 @@ body.sb-sidenav-toggled #sidebar-wrapper { margin-left: 0; }
 .customer-info p { font-size: 18px; font-weight: 700; color: #111827; }
 
 .invoice-table { width: 100%; border-collapse: collapse; margin: 12px 0 0 0; }
-.invoice-table thead { background: #f9fafb; }
-.invoice-table th { padding: 14px 28px; text-align: left; font-size: 12px; text-transform: uppercase; color: #6b7280; border-bottom: 2px solid #e5e7eb; }
+.invoice-table thead { background: var(--table-head-bg); }
+.invoice-table th { padding: 14px 28px; text-align: left; font-size: 12px; text-transform: uppercase; color: var(--text-muted); border-bottom: 2px solid var(--border-color); }
 .invoice-table th:last-child, .invoice-table td:last-child { text-align: right; }
-.invoice-table td { padding: 16px 28px; font-size: 15px; font-weight: 500; color: #374151; border-bottom: 1px solid #f3f4f6; }
+.invoice-table td { padding: 16px 28px; font-size: 15px; font-weight: 500; color: var(--text-main); border-bottom: 1px solid var(--table-border); }
 
-.summary { padding: 24px 28px 32px 28px; border-top: 2px solid #e5e7eb; text-align: right; }
-.summary p { font-size: 16px; margin-bottom: 10px; color: #4b5563; }
-.summary strong { color: #111827; font-weight: 700; }
-.amount-highlight { font-size: 24px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed #d1d5db; color: #111827; font-weight: 800; }
+.summary { padding: 24px 28px 32px 28px; border-top: 2px solid var(--border-color); text-align: right; }
+.summary p { font-size: 16px; margin-bottom: 10px; color: var(--text-main); }
+.summary strong { color: var(--text-heading); font-weight: 700; }
+.amount-highlight { font-size: 24px; margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--input-border); color: var(--text-heading); font-weight: 800; }
 
-.invoice-footer { text-align: center; padding: 16px; background: #f9fafb; font-size: 13px; color: #9ca3af; font-weight: 500;}
+.invoice-footer { text-align: center; padding: 16px; background: var(--table-head-bg); font-size: 13px; color: var(--text-muted); font-weight: 500;}
 
 /* ─── 8. MOBILE RESPONSIVENESS ─── */
 @media (max-width: 991px) {
