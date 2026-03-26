@@ -263,8 +263,14 @@ function editProduct(id) {
   document.getElementById("productStock").value = p.stock;
   editId = id;
   document.getElementById("productModalTitle").innerText = "Edit Product";
-  new bootstrap.Modal(document.getElementById("productModal")).show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("productModal")).show();
 }
+
+document.getElementById("productModal").addEventListener("hidden.bs.modal", () => {
+  editId = null;
+  clearForm();
+  document.getElementById("productModalTitle").innerText = "Add Cosmetic Item";
+});
 
 searchInput.addEventListener("input", function () {
   const value = this.value.toLowerCase();

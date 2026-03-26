@@ -207,8 +207,14 @@ function editSupplier(id) {
   document.getElementById("supCompany").value = s.company || "";
   editId = id;
   document.getElementById("supplierModalTitle").innerText = "Edit Supplier";
-  new bootstrap.Modal(document.getElementById("supplierModal")).show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("supplierModal")).show();
 }
+
+document.getElementById("supplierModal").addEventListener("hidden.bs.modal", () => {
+  editId = null;
+  clearForm();
+  document.getElementById("supplierModalTitle").innerText = "Add Supplier";
+});
 
 searchInput.addEventListener("input", function () {
   const value = this.value.toLowerCase();

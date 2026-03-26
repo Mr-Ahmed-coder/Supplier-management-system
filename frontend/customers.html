@@ -301,7 +301,7 @@ async function viewCustomer(id) {
       </div>
     </div>
   `;
-  new bootstrap.Modal(document.getElementById("viewCustomerModal")).show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("viewCustomerModal")).show();
   
   try {
     const res = await fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() });
@@ -338,8 +338,15 @@ function editCustomer(id) {
   document.getElementById("custBalance").value = c.balance;
   editId = id;
   document.getElementById("customerModalTitle").innerText = "Edit Customer";
-  new bootstrap.Modal(document.getElementById("customerModal")).show();
+  bootstrap.Modal.getOrCreateInstance(document.getElementById("customerModal")).show();
 }
+
+// Ensure state is cleared strictly when the modal closes
+document.getElementById("customerModal").addEventListener("hidden.bs.modal", () => {
+  editId = null;
+  clearForm();
+  document.getElementById("customerModalTitle").innerText = "Add Customer";
+});
 
 searchInput.addEventListener("input", function () {
   const value = this.value.toLowerCase();
