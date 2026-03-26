@@ -70,7 +70,12 @@
   </div>
 
   <script>
-    const API_URL = '/api';
+    let API_URL = '/api';
+    if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') {
+        if (window.location.port !== '5000') {
+            API_URL = 'http://localhost:5000/api';
+        }
+    }
 
     function getAuthHeaders() {
       const token = localStorage.getItem('token');

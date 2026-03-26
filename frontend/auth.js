@@ -1,4 +1,10 @@
-const API_URL = '/api';
+let API_URL = '/api';
+// Fallback for developers using VSCode Live Server (5500) or opening static HTML files directly
+if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'localhost' || window.location.protocol === 'file:') {
+    if (window.location.port !== '5000') {
+        API_URL = 'http://localhost:5000/api';
+    }
+}
 
 function checkAuth() {
   const token = localStorage.getItem('token');

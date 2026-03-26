@@ -28,7 +28,7 @@ if (fs.existsSync(authPath)) {
     const apiUrl = process.env.API_URL || '/api';
 
     // Simple replacement of the exact string
-    authCode = authCode.replace("const API_URL = '/api';", `const API_URL = '${apiUrl}';`);
+    authCode = authCode.replace("let API_URL = '/api';", `let API_URL = '${apiUrl}';`);
 
     fs.writeFileSync(authPath, authCode);
 }
