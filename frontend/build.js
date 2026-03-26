@@ -19,18 +19,7 @@ for (const file of files) {
     fs.cpSync(src, dest, { recursive: true });
 }
 
-// Inject API_URL into auth.js
-const authPath = path.join(buildDir, 'auth.js');
-if (fs.existsSync(authPath)) {
-    let authCode = fs.readFileSync(authPath, 'utf8');
-
-    // Default to relative /api if API_URL env is not provided (e.g. local unified testing)
-    const apiUrl = process.env.API_URL || '/api';
-
-    // Simple replacement of the exact string
-    authCode = authCode.replace("let API_URL = '/api';", `let API_URL = '${apiUrl}';`);
-
-    fs.writeFileSync(authPath, authCode);
-}
+    // Removed dangerous string replacement logic that previously injected process.env.API_URL into the monolithic build
+    console.log("Skipping dynamic API_URL injection. The static system natively relies on /api routing.");
 
 console.log('Frontend built successfully in /build with API_URL: ' + (process.env.API_URL || '/api'));
