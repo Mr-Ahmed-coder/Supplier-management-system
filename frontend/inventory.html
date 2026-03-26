@@ -161,10 +161,16 @@ const isAdmin = currentUser && currentUser.role === 'Admin';
 
 async function fetchProducts() {
   try {
-    const res = await fetch(`${API_URL}/products`, { headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/products?_t=${Date.now()}`, { 
+        headers: getAuthHeaders(),
+        cache: "no-store" 
+    });
     products = await res.json();
     renderProducts();
-  } catch(err) { console.error(err); }
+  } catch(err) { 
+      alert("Error fetching products: " + err.message);
+      console.error(err); 
+  }
 }
 
 function renderProducts() {
@@ -239,9 +245,13 @@ saveBtn.addEventListener("click", async function () {
       clearForm();
       bootstrap.Modal.getOrCreateInstance(document.getElementById("productModal")).hide();
     } else {
-      alert("Error saving product. Check permissions.");
+      const errData = await res.json().catch(() => ({}));
+      alert(`Error saving product: ${errData.message || res.statusText}. Check permissions.`);
     }
-  } catch(err) { console.error(err); }
+  } catch(err) { 
+      alert(`Network/System Error: ${err.message}`);
+      console.error(err); 
+  }
 });
 
 async function deleteProduct(id) {

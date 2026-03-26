@@ -122,10 +122,16 @@ const isAdmin = currentUser && currentUser.role === 'Admin';
 
 async function fetchSuppliers() {
   try {
-    const res = await fetch(`${API_URL}/suppliers`, { headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/suppliers?_t=${Date.now()}`, { 
+        headers: getAuthHeaders(),
+        cache: "no-store" 
+    });
     suppliers = await res.json();
     renderSuppliers();
-  } catch(err) { console.error(err); }
+  } catch(err) { 
+      alert("Error fetching suppliers: " + err.message);
+      console.error(err); 
+  }
 }
 
 function renderSuppliers() {
@@ -183,9 +189,13 @@ saveBtn.addEventListener("click", async function () {
       clearForm();
       bootstrap.Modal.getOrCreateInstance(document.getElementById("supplierModal")).hide();
     } else {
-      alert("Error saving supplier. Check permissions.");
+      const errData = await res.json().catch(() => ({}));
+      alert(`Error saving supplier: ${errData.message || res.statusText}. Check permissions.`);
     }
-  } catch(err) { console.error(err); }
+  } catch(err) { 
+      alert(`Network/System Error: ${err.message}`);
+      console.error(err); 
+  }
 });
 
 async function deleteSupplier(id) {

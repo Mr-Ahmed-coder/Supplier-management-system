@@ -183,10 +183,16 @@ const isAdmin = currentUser && currentUser.role === 'Admin';
 
 async function fetchCustomers() {
   try {
-    const res = await fetch(`${API_URL}/customers`, { headers: getAuthHeaders() });
+    const res = await fetch(`${API_URL}/customers?_t=${Date.now()}`, { 
+        headers: getAuthHeaders(),
+        cache: "no-store" 
+    });
     customers = await res.json();
     renderCustomers();
-  } catch(err) { console.error(err); }
+  } catch(err) { 
+      alert("Error fetching customers: " + err.message);
+      console.error(err); 
+  }
 }
 
 function renderCustomers() {
@@ -272,9 +278,13 @@ saveBtn.addEventListener("click", async function () {
       clearForm();
       bootstrap.Modal.getOrCreateInstance(document.getElementById("customerModal")).hide();
     } else {
-      alert("Error saving customer. Check permissions.");
+      const errData = await res.json().catch(() => ({}));
+      alert(`Error saving customer: ${errData.message || res.statusText}. Check permissions.`);
     }
-  } catch(err) { console.error(err); }
+  } catch(err) { 
+      alert(`Network/System Error: ${err.message}`);
+      console.error(err); 
+  }
 });
 
 async function viewCustomer(id) {
