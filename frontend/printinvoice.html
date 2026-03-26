@@ -134,16 +134,28 @@
         const custName = inv.customerName || (inv.customer ? inv.customer.name : 'Unknown');
         document.getElementById('customerName').textContent = custName;
 
-        // Items table — show invoice as a single line item
+        // Items table — loop through cart items
         const tbody = document.getElementById('itemsBody');
-        tbody.innerHTML = `
-        <tr>
-          <td>Invoice Charge</td>
-          <td>1</td>
-          <td>${formatCurrency(inv.amount)}</td>
-          <td>${formatCurrency(inv.amount)}</td>
-        </tr>
-      `;
+        if (inv.items && inv.items.length > 0) {
+            tbody.innerHTML = inv.items.map(item => `
+              <tr>
+                <td>${item.productName || (item.product && item.product.name ? item.product.name : 'Cosmetic Item')}</td>
+                <td>${item.quantity}</td>
+                <td>${formatCurrency(item.price)}</td>
+                <td>${formatCurrency(item.subtotal)}</td>
+              </tr>
+            `).join('');
+        } else {
+            // Backward compatibility for old invoices
+            tbody.innerHTML = `
+            <tr>
+              <td>Legacy Invoice Charge</td>
+              <td>1</td>
+              <td>${formatCurrency(inv.amount)}</td>
+              <td>${formatCurrency(inv.amount)}</td>
+            </tr>
+          `;
+        }
 
         // Fetch receipts (payments) linked to this invoice
         let totalPaid = 0;

@@ -57,9 +57,11 @@
                       placeholder="e.g. Acme Corp">
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Amount (UGX)</label>
-                    <input type="number" class="form-control" id="invoiceAmount" min="0" step="0.01" required
-                      placeholder="0">
+                    <label class="form-label">Grand Total (UGX)</label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-light text-primary fw-bold">UGX</span>
+                      <input type="text" class="form-control fw-bold text-primary" id="invoiceAmount" readonly value="0">
+                    </div>
                   </div>
                   <div class="col-md-6">
                     <label class="form-label">Date Issued</label>
@@ -73,6 +75,45 @@
                       <option value="Overdue">Overdue</option>
                     </select>
                   </div>
+                </div>
+                
+                <!-- Items Cart Section -->
+                <h5 class="card-title border-bottom pb-3 mb-4 mt-5">Invoice Items</h5>
+                <div class="row g-3 align-items-end mb-4 bg-light p-3 rounded shadow-sm border">
+                  <div class="col-md-5">
+                    <label class="form-label fw-semibold text-secondary small">Select Cosmetic Item</label>
+                    <select class="form-select" id="itemProduct">
+                      <option value="">-- Choose Product --</option>
+                    </select>
+                  </div>
+                  <div class="col-md-2">
+                    <label class="form-label fw-semibold text-secondary small">Price</label>
+                    <input type="number" class="form-control bg-white" id="itemPrice" readonly placeholder="0">
+                  </div>
+                  <div class="col-md-3">
+                    <label class="form-label fw-semibold text-secondary small">Quantity</label>
+                    <input type="number" class="form-control" id="itemQuantity" min="1" placeholder="Qty">
+                  </div>
+                  <div class="col-md-2">
+                    <button class="btn btn-outline-primary w-100 fw-semibold" id="addToCartBtn"><i class="bi bi-cart-plus"></i> Add</button>
+                  </div>
+                </div>
+
+                <div class="table-responsive mb-4">
+                  <table class="table table-bordered table-hover align-middle">
+                    <thead class="table-light">
+                      <tr>
+                        <th>Item Description</th>
+                        <th>Unit Price</th>
+                        <th>Qty</th>
+                        <th>Subtotal</th>
+                        <th class="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody id="cartTableBody">
+                      <tr><td colspan="5" class="text-center text-muted">No items added yet.</td></tr>
+                    </tbody>
+                  </table>
                 </div>
 
                 <div class="d-flex justify-content-end border-top pt-4">
@@ -120,15 +161,33 @@
       const currentUser = userStr ? JSON.parse(userStr) : null;
       const isAdmin = currentUser && currentUser.role === 'Admin';
 
+      let products = [];
+      let cartItems = [];
+
       async function fetchInitialData() {
         try {
-          const custRes = await fetch(`${API_URL}/customers`, { headers: getAuthHeaders() });
+          const custRes = await fetch(`${API_URL}/customers?_t=${Date.now()}`, { headers: getAuthHeaders(), cache: "no-store" });
           customers = await custRes.json();
+
+          const prodRes = await fetch(`${API_URL}/products?_t=${Date.now()}`, { headers: getAuthHeaders(), cache: "no-store" });
+          products = await prodRes.json();
+          
+          const productSelect = document.getElementById("itemProduct");
+          products.forEach(p => {
+            if (p.stock > 0) {
+              const opt = document.createElement("option");
+              opt.value = p._id;
+              opt.textContent = `${p.name} (Stock: ${p.stock})`;
+              opt.dataset.price = p.price;
+              opt.dataset.name = p.name;
+              opt.dataset.maxStock = p.stock;
+              productSelect.appendChild(opt);
+            }
+          });
 
           if (queryId) {
             editId = queryId;
             document.getElementById('pageHeaderTitle').innerText = 'Edit Invoice';
-            // Show print button with link to styled print page
             const printBtn = document.getElementById('printInvoiceBtn');
             printBtn.style.display = 'inline-block';
             printBtn.href = `printinvoice.html?id=${editId}`;
@@ -141,16 +200,25 @@
             const inv = invoices.find(x => x._id === editId);
 
             if (inv) {
-              // Format date for the input
               let dateVal = "";
               if (inv.date) {
                 const d = new Date(inv.date);
                 if (!isNaN(d)) dateVal = d.toISOString().split('T')[0];
               }
               document.getElementById("customerName").value = inv.customerName || (inv.customer ? inv.customer.name : '');
-              document.getElementById("invoiceAmount").value = inv.amount;
               document.getElementById("invoiceDate").value = dateVal;
               document.getElementById("invoiceStatus").value = inv.status;
+              
+              if (inv.items && Array.isArray(inv.items)) {
+                  cartItems = inv.items.map(item => ({
+                      productId: item.product._id || item.product,
+                      productName: item.productName || (item.product.name ? item.product.name : "Unknown"),
+                      price: item.price,
+                      quantity: item.quantity,
+                      subtotal: item.subtotal
+                  }));
+              }
+              renderCart();
             }
           } else {
             document.getElementById("invoiceDate").value = new Date().toISOString().split('T')[0];
@@ -158,31 +226,114 @@
         } catch (err) { console.error(err); }
       }
 
+      document.getElementById("itemProduct").addEventListener("change", function() {
+        const selected = this.options[this.selectedIndex];
+        if (selected.value) {
+            document.getElementById("itemPrice").value = selected.dataset.price;
+            document.getElementById("itemQuantity").value = 1;
+            document.getElementById("itemQuantity").max = selected.dataset.maxStock;
+        } else {
+            document.getElementById("itemPrice").value = "";
+            document.getElementById("itemQuantity").value = "";
+        }
+      });
+
+      document.getElementById("addToCartBtn").addEventListener("click", function(e) {
+          e.preventDefault();
+          const select = document.getElementById("itemProduct");
+          const selected = select.options[select.selectedIndex];
+          if (!selected.value) return alert("Please select a product.");
+
+          const qtyStr = document.getElementById("itemQuantity").value;
+          const qty = parseInt(qtyStr);
+          const maxStock = parseInt(selected.dataset.maxStock);
+
+          if (isNaN(qty) || qty <= 0) return alert("Please enter a valid quantity.");
+          if (!editId && qty > maxStock) return alert(`Not enough stock. Only ${maxStock} available.`);
+
+          const price = parseFloat(selected.dataset.price);
+          const existingItemIndex = cartItems.findIndex(item => item.productId === selected.value);
+
+          if (existingItemIndex > -1) {
+              const newQty = cartItems[existingItemIndex].quantity + qty;
+              if (!editId && newQty > maxStock) return alert(`Not enough stock. Only ${maxStock} available in total.`);
+              cartItems[existingItemIndex].quantity = newQty;
+              cartItems[existingItemIndex].subtotal = newQty * price;
+          } else {
+              cartItems.push({
+                  productId: selected.value,
+                  productName: selected.dataset.name,
+                  price: price,
+                  quantity: qty,
+                  subtotal: qty * price
+              });
+          }
+
+          select.value = "";
+          document.getElementById("itemPrice").value = "";
+          document.getElementById("itemQuantity").value = "";
+          renderCart();
+      });
+
+      window.removeFromCart = function(index) {
+          cartItems.splice(index, 1);
+          renderCart();
+      };
+
+      function renderCart() {
+          const tbody = document.getElementById("cartTableBody");
+          tbody.innerHTML = "";
+          let grandTotal = 0;
+
+          if (cartItems.length === 0) {
+              tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted">No items added yet.</td></tr>';
+              document.getElementById("invoiceAmount").value = "0";
+              return;
+          }
+
+          cartItems.forEach((item, index) => {
+              grandTotal += item.subtotal;
+              tbody.innerHTML += `
+                  <tr>
+                      <td class="fw-semibold">${item.productName}</td>
+                      <td>UGX ${item.price.toLocaleString('en-US')}</td>
+                      <td>${item.quantity}</td>
+                      <td class="fw-bold text-primary">UGX ${item.subtotal.toLocaleString('en-US')}</td>
+                      <td class="text-center">
+                          <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})"><i class="bi bi-x"></i></button>
+                      </td>
+                  </tr>
+              `;
+          });
+          document.getElementById("invoiceAmount").value = grandTotal.toLocaleString('en-US');
+      }
+
       document.getElementById("saveInvoice").addEventListener("click", async function () {
         const name = document.getElementById("customerName").value.trim();
-        const amount = parseFloat(document.getElementById("invoiceAmount").value);
         const date = document.getElementById("invoiceDate").value;
         const status = document.getElementById("invoiceStatus").value;
 
-        if (!name || isNaN(amount) || !date) return alert("Please fill all fields.");
-        if (amount < 0) return alert("Amount cannot be negative.");
+        if (!name || !date) return alert("Please fill all invoice details.");
+        if (cartItems.length === 0) return alert("Please add at least one item to the cart before saving.");
+
+        const formattedItems = cartItems.map(item => ({
+            product: item.productId,
+            productName: item.productName,
+            quantity: item.quantity,
+            price: item.price
+        }));
 
         const matchingCust = customers.find(c => c.name.toLowerCase() === name.toLowerCase());
         const customerId = matchingCust ? matchingCust._id : null;
 
-        // Auto-generate invoice number for new invoices
         let invoiceNumber = '';
         if (editId) {
-          // When editing, get the existing invoice number
-          const existingInv = await fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() }).then(r => r.json());
+          const existingInv = await fetch(`${API_URL}/invoices?_t=${Date.now()}`, { headers: getAuthHeaders(), cache: "no-store" }).then(r => r.json());
           const found = existingInv.find(x => x._id === editId);
           invoiceNumber = found ? found.number : `INV-${Date.now()}`;
         } else {
-          // Generate a unique invoice number: INV-YYYYMMDD-XXXXX
           const now = new Date();
-          const dateStr = now.getFullYear().toString() +
-            String(now.getMonth() + 1).padStart(2, '0') +
-            String(now.getDate()).padStart(2, '0');
+          const dateStr = now.getFullYear().toString() + String(now.getMonth() + 1).padStart(2, '0') + String(now.getDate()).padStart(2, '0');
           const rand = String(Math.floor(Math.random() * 100000)).padStart(5, '0');
           invoiceNumber = `INV-${dateStr}-${rand}`;
         }
@@ -191,7 +342,9 @@
           number: invoiceNumber,
           customer: customerId,
           customerName: name,
-          amount, date, status
+          date, 
+          status,
+          items: formattedItems
         };
 
         try {
@@ -210,9 +363,12 @@
             window.location.href = "invoice.html";
           } else {
             const errData = await res.json().catch(() => ({}));
-            alert(errData.message || "Error saving invoice. Check permissions.");
+            alert(errData.message || "Error saving invoice. Ensure enough stock is available.");
           }
-        } catch (err) { console.error(err); }
+        } catch (err) { 
+            alert("System Error: " + err.message);
+            console.error(err); 
+        }
       });
 
       document.getElementById("deleteInvoiceBtn").addEventListener("click", async function () {
