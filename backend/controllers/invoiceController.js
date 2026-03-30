@@ -1,16 +1,18 @@
 const Invoice = require('../models/Invoice');
 const Customer = require('../models/Customer');
 const Product = require('../models/Product');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/AppError');
 
-const getInvoices = async (req, res) => {
+const getInvoices = catchAsync(async (req, res, next) => {
   const invoices = await Invoice.find({})
     .populate('customer', 'name email')
     .populate('createdBy', 'username')
     .populate('items.product', 'name category');
   res.json(invoices);
-};
+});
 
-const createInvoice = async (req, res, next) => {
+const createInvoice = catchAsync(async (req, res, next) => {
   const session = await Invoice.startSession();
   session.startTransaction();
 
@@ -18,8 +20,7 @@ const createInvoice = async (req, res, next) => {
     let { number, customer, customerName, date, items, status } = req.body;
     
     if (!number || !items || !Array.isArray(items) || items.length === 0) {
-      res.status(400);
-      throw new Error('Invoice number and at least one item are required');
+      throw new AppError('Invoice number and at least one cart item are required', 400);
     }
 
     let calculatedAmount = 0;
@@ -30,13 +31,11 @@ const createInvoice = async (req, res, next) => {
       const product = await Product.findById(item.product).session(session);
       
       if (!product) {
-        res.status(404);
-        throw new Error(`Product not found: ${item.productName || item.product}`);
+        throw new AppError(`Product not found: ${item.productName || item.product}`, 404);
       }
 
       if (product.stock < item.quantity) {
-        res.status(400);
-        throw new Error(`Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`);
+        throw new AppError(`Not enough stock for ${product.name}. Available: ${product.stock}, Requested: ${item.quantity}`, 400);
       }
 
       const itemSubtotal = item.quantity * item.price;
@@ -94,29 +93,26 @@ const createInvoice = async (req, res, next) => {
     await session.abortTransaction();
     session.endSession();
     
-    if (err.code === 11000) {
-      res.status(400);
-      return next(new Error('Invoice number already exists. Please try again.'));
-    }
-    next(err);
+    // In Express 5 err is caught implicitly, but with catchAsync we naturally bounce it backward
+    return next(err);
   }
-};
+});
 
 
-const updateInvoice = async (req, res) => {
+const updateInvoice = catchAsync(async (req, res, next) => {
   const invoice = await Invoice.findById(req.params.id);
-  if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
+  if (!invoice) return next(new AppError('Invoice not found', 404));
 
-  const updatedInvoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true });
+  const updatedInvoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   res.json(updatedInvoice);
-};
+});
 
-const deleteInvoice = async (req, res) => {
+const deleteInvoice = catchAsync(async (req, res, next) => {
   const invoice = await Invoice.findById(req.params.id);
-  if (!invoice) return res.status(404).json({ message: 'Invoice not found' });
+  if (!invoice) return next(new AppError('Invoice not found', 404));
 
   await invoice.deleteOne();
   res.json({ message: 'Invoice removed' });
-};
+});
 
 module.exports = { getInvoices, createInvoice, updateInvoice, deleteInvoice };

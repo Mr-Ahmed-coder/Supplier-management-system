@@ -28,13 +28,23 @@ mongoose.connect(process.env.MONGODB_URI)
   .catch(err => console.error('MongoDB connection error:', err));
 
 const { errorHandler } = require('./middleware/errorHandler');
+const AppError = require('./utils/AppError');
+
+// Trap unhandled API routes and feed them into the Error Handler
+app.use((req, res, next) => {
+  if (req.originalUrl.startsWith('/api')) {
+    next(new AppError(`Can't find ${req.originalUrl} on this server!`, 404));
+  } else {
+    next();
+  }
+});
 
 // Catch-all route to serve the SPA or main page
 app.use((req, res, next) => {
   if (req.method === 'GET') {
     res.sendFile(path.resolve(__dirname, '../frontend', 'dashboard.html'));
   } else {
-    res.status(404).json({ message: 'Route not found' });
+    next(new AppError('Route not found', 404));
   }
 });
 

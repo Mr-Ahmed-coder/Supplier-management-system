@@ -1,5 +1,7 @@
 const jwt = require('jsonwebtoken');
 const User = require('../models/User');
+const catchAsync = require('../utils/catchAsync');
+const AppError = require('../utils/AppError');
 
 const generateToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, { expiresIn: '30d' });
@@ -8,104 +10,94 @@ const generateToken = (id) => {
 // @desc    Register new user
 // @route   POST /api/users
 // @access  Public
-const registerUser = async (req, res) => {
+const registerUser = catchAsync(async (req, res, next) => {
   const { username, email, password } = req.body;
   if (!username || !email || !password) {
-    return res.status(400).json({ message: 'Please add all fields' });
+    return next(new AppError('Please add all fields', 400));
   }
 
   const userExists = await User.findOne({ email });
   if (userExists) {
-    return res.status(400).json({ message: 'User already exists' });
+    return next(new AppError('User already exists', 400));
   }
 
   const user = await User.create({ username, email, password });
-  if (user) {
-    res.status(201).json({
-      _id: user.id, username: user.username, email: user.email, role: user.role,
-      token: generateToken(user._id)
-    });
-  } else {
-    res.status(400).json({ message: 'Invalid user data' });
+  if (!user) {
+    return next(new AppError('Invalid user data', 400));
   }
-};
+  
+  res.status(201).json({
+    _id: user.id, username: user.username, email: user.email, role: user.role,
+    token: generateToken(user._id)
+  });
+});
 
 // @desc    Authenticate a user
 // @route   POST /api/users/login
 // @access  Public
-const loginUser = async (req, res) => {
+const loginUser = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
+  
+  if (!email || !password) {
+    return next(new AppError('Please provide email and password', 400));
+  }
+
   const user = await User.findOne({ email });
 
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user.id, username: user.username, email: user.email, role: user.role,
-      token: generateToken(user._id)
-    });
-  } else {
-    res.status(401).json({ message: 'Invalid credentials' });
+  if (!user || !(await user.matchPassword(password))) {
+    return next(new AppError('Invalid credentials', 401));
   }
-};
+
+  res.json({
+    _id: user.id, username: user.username, email: user.email, role: user.role,
+    token: generateToken(user._id)
+  });
+});
 
 // @desc    Get user data
 // @route   GET /api/users/me
 // @access  Private
-const getMe = async (req, res) => {
+const getMe = catchAsync(async (req, res, next) => {
   res.status(200).json(req.user);
-};
+});
 
 // @desc    Get all users
 // @route   GET /api/users
 // @access  Private/Admin
-const getUsers = async (req, res, next) => {
-  try {
-    const users = await User.find({}).select('-password');
-    res.json(users);
-  } catch (error) {
-    next(error);
-  }
-};
+const getUsers = catchAsync(async (req, res, next) => {
+  const users = await User.find({}).select('-password');
+  res.json(users);
+});
 
 // @desc    Delete user
 // @route   DELETE /api/users/:id
 // @access  Private/Admin
-const deleteUser = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      res.status(404);
-      throw new Error('User not found');
-    }
-    // Prevent admin from deleting themselves accidentally
-    if (user._id.toString() === req.user._id.toString()) {
-      res.status(400);
-      throw new Error('Cannot delete yourself');
-    }
-    await user.deleteOne();
-    res.json({ message: 'User removed' });
-  } catch (error) {
-    next(error);
+const deleteUser = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new AppError('User not found', 404));
   }
-};
+  // Prevent admin from deleting themselves accidentally
+  if (user._id.toString() === req.user._id.toString()) {
+    return next(new AppError('Cannot delete yourself', 400));
+  }
+  await user.deleteOne();
+  res.json({ message: 'User removed' });
+});
 
 // @desc    Update user role
 // @route   PUT /api/users/:id/role
 // @access  Private/Admin
-const updateUserRole = async (req, res, next) => {
-  try {
-    const user = await User.findById(req.params.id);
-    if (!user) {
-      res.status(404);
-      throw new Error('User not found');
-    }
-    
-    user.role = req.body.role || 'User';
-    const updatedUser = await user.save();
-    
-    res.json({ message: 'User role updated', role: updatedUser.role });
-  } catch (error) {
-    next(error);
+const updateUserRole = catchAsync(async (req, res, next) => {
+  const user = await User.findById(req.params.id);
+  if (!user) {
+    return next(new AppError('User not found', 404));
   }
-};
+  
+  user.role = req.body.role || 'User';
+  const updatedUser = await user.save();
+  
+  res.json({ message: 'User role updated', role: updatedUser.role });
+});
 
 module.exports = { registerUser, loginUser, getMe, getUsers, deleteUser, updateUserRole };

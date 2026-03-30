@@ -1,8 +1,9 @@
 const Invoice = require('../models/Invoice');
 const Product = require('../models/Product');
 const Customer = require('../models/Customer');
+const catchAsync = require('../utils/catchAsync');
 
-const getDashboardStats = async (req, res) => {
+const getDashboardStats = catchAsync(async (req, res, next) => {
   const invoices = await Invoice.find({});
   const products = await Product.find({});
   const customers = await Customer.find({});
@@ -36,6 +37,6 @@ const getDashboardStats = async (req, res) => {
     productCount: products.length,
     customerCount: customers.length
   });
-};
+});
 
 module.exports = { getDashboardStats };
