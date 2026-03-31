@@ -3,6 +3,7 @@ const Customer = require('../models/Customer');
 const Product = require('../models/Product');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const { Parser } = require('json2csv');
 
 const getInvoices = catchAsync(async (req, res, next) => {
   const invoices = await Invoice.find({})
@@ -161,4 +162,52 @@ const deleteInvoice = catchAsync(async (req, res, next) => {
   res.json({ message: 'Invoice removed' });
 });
 
-module.exports = { getInvoices, createInvoice, updateInvoice, deleteInvoice };
+// CSV Engine for Google Sheets Imports
+const exportInvoicesCSV = catchAsync(async (req, res, next) => {
+  const invoices = await Invoice.find({})
+    .populate('customer', 'name email')
+    .sort({ createdAt: -1 });
+
+  if (!invoices || invoices.length === 0) {
+    return next(new AppError('No invoices available for export', 404));
+  }
+
+  const exportData = invoices.map(inv => {
+    const totalAmount = inv.totalAmount !== undefined ? inv.totalAmount : (inv.amount || 0);
+    const amountPaid = inv.amountPaid !== undefined ? inv.amountPaid : (inv.status === 'Paid' ? totalAmount : 0);
+    const balance = inv.balance !== undefined ? inv.balance : Math.max(0, totalAmount - amountPaid);
+    
+    let dateStr = 'Unknown';
+    if (inv.date) dateStr = new Date(inv.date).toLocaleDateString();
+    else if (inv.createdAt) dateStr = new Date(inv.createdAt).toLocaleDateString();
+
+    return {
+      'Invoice Number': inv.number,
+      'Customer Name': inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'),
+      'Total Amount': totalAmount,
+      'Amount Paid': amountPaid,
+      'Balance': balance,
+      'Status': inv.status,
+      'Date ISSUED': dateStr
+    };
+  });
+
+  const fields = ['Invoice Number', 'Customer Name', 'Total Amount', 'Amount Paid', 'Balance', 'Status', 'Date ISSUED'];
+  const json2csvParser = new Parser({ fields });
+  const csvFormat = json2csvParser.parse(exportData);
+
+  res.header('Content-Type', 'text/csv');
+  res.attachment('invoices_export.csv');
+  return res.send(csvFormat);
+});
+
+// Advanced Feature Stub: Direct Google Sheets Server-To-Server Synchronization
+const syncWithGoogleSheetsAPI = catchAsync(async (req, res, next) => {
+   // TODO: Future Implementation
+   // 1. Setup GoogleAuth Service Account logic (credentials.json)
+   // 2. Bind google.sheets({ version: 'v4', auth })
+   // 3. sheets.spreadsheets.values.update({ target_spreadsheetId, range: "Sheet1!A1", valueInputOption: 'USER_ENTERED', requestBody: ... })
+   res.status(501).json({ status: 'fail', message: 'Automated API Sync pending architecture review snippet. Please utilize Manual Export CSV feature.' });
+});
+
+module.exports = { getInvoices, createInvoice, updateInvoice, deleteInvoice, exportInvoicesCSV, syncWithGoogleSheetsAPI };

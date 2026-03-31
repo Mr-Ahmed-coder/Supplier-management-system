@@ -36,9 +36,14 @@
           <h3 class="fw-bold mb-1">Invoices</h3>
           <p class="text-muted mb-0">View and manage customer billing</p>
         </div>
-        <a href="createinvoice.html" class="btn btn-primary">
-          <i class="bi bi-plus-lg me-1"></i> Create Invoice
-        </a>
+        <div>
+          <button class="btn btn-outline-success me-2" id="exportCsvBtn" title="Export ready for Google Sheets">
+            <i class="bi bi-filetype-csv me-1"></i> Export CSV
+          </button>
+          <a href="createinvoice.html" class="btn btn-primary">
+            <i class="bi bi-plus-lg me-1"></i> Create Invoice
+          </a>
+        </div>
       </div>
 
       <!-- Search & Table Card -->
@@ -131,6 +136,44 @@ document.getElementById("searchInput").addEventListener("input", function() {
   rows.forEach(row => {
     row.style.display = row.innerText.toLowerCase().includes(value) ? "" : "none";
   });
+});
+
+document.getElementById("exportCsvBtn").addEventListener("click", async function() {
+  try {
+    const btn = this;
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...`;
+    btn.disabled = true;
+
+    const res = await fetch(`${API_URL}/invoices/export/csv`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!res.ok) {
+        let errMsg = "Export failed.";
+        try { const errData = await res.json(); errMsg = errData.message; } catch(e) {}
+        throw new Error(errMsg);
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = `POS_Invoices_Export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    btn.innerHTML = oldHtml;
+    btn.disabled = false;
+
+  } catch (err) {
+      alert("CSV Export Error: " + err.message);
+      this.innerHTML = `<i class="bi bi-filetype-csv me-1"></i> Export CSV`;
+      this.disabled = false;
+  }
 });
 
 fetchInvoices();
