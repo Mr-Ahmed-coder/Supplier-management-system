@@ -53,7 +53,9 @@
                   <th>Invoice #</th>
                   <th>Customer Name</th>
                   <th>Date Issued</th>
-                  <th>Amount</th>
+                  <th>Total Amount</th>
+                  <th>Paid</th>
+                  <th>Balance</th>
                   <th>Status</th>
                   <th>Actions</th>
                 </tr>
@@ -95,17 +97,28 @@ function renderInvoices() {
   }
   
   invoices.forEach(inv => {
-    const badgeClass = inv.status === "Paid" ? "status-paid" : inv.status === "Pending" ? "status-pending" : "status-overdue";
+    // Math Resolvers to handle legacy structure mappings
+    const totalAmount = inv.totalAmount !== undefined ? inv.totalAmount : (inv.amount || 0);
+    const amountPaid = inv.amountPaid !== undefined ? inv.amountPaid : (inv.status === 'Paid' ? totalAmount : 0);
+    const balance = inv.balance !== undefined ? inv.balance : (inv.status === 'Paid' ? 0 : totalAmount);
+
+    let badgeClass = "badge-status text-white ";
+    if (inv.status === "Paid") badgeClass += "bg-success";
+    else if (inv.status === "Partial") badgeClass += "bg-warning text-dark";
+    else badgeClass += "bg-danger";
+    
     table.innerHTML += `
       <tr>
         <td class="fw-semibold text-dark">${inv.number}</td>
         <td>${inv.customerName || (inv.customer ? inv.customer.name : 'Unknown')}</td>
         <td>${inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}</td>
-        <td class="fw-bold text-primary">UGX ${Number(inv.amount).toLocaleString('en-US')}</td>
-        <td><span class="badge-status ${badgeClass}">${inv.status}</span></td>
+        <td class="fw-bold">UGX ${Number(totalAmount).toLocaleString('en-US')}</td>
+        <td class="text-success text-opacity-75 fw-bold">UGX ${Number(amountPaid).toLocaleString('en-US')}</td>
+        <td class="text-danger fw-bold">UGX ${Number(balance).toLocaleString('en-US')}</td>
+        <td><span class="badge ${badgeClass}">${inv.status}</span></td>
         <td>
-          <button class="btn btn-sm btn-outline-primary me-1" onclick="window.location.href='createinvoice.html?id=${inv._id}'"><i class="bi bi-eye me-1"></i>View / Edit</button>
-          <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='printinvoice.html?id=${inv._id}'"><i class="bi bi-printer me-1"></i>Print</button>
+          <button class="btn btn-sm btn-outline-primary me-1" onclick="window.location.href='createinvoice.html?id=${inv._id}'" title="View / Edit / Pay"><i class="bi bi-pencil-square"></i></button>
+          <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='printinvoice.html?id=${inv._id}'" title="Print Output"><i class="bi bi-printer"></i></button>
         </td>
       </tr>
     `;

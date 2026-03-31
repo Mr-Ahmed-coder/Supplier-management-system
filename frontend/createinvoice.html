@@ -57,23 +57,30 @@
                       placeholder="e.g. Acme Corp">
                   </div>
                   <div class="col-md-6">
-                    <label class="form-label">Grand Total (UGX)</label>
-                    <div class="input-group">
-                      <span class="input-group-text bg-light text-primary fw-bold">UGX</span>
-                      <input type="text" class="form-control fw-bold text-primary" id="invoiceAmount" readonly value="0">
-                    </div>
-                  </div>
-                  <div class="col-md-6">
                     <label class="form-label">Date Issued</label>
                     <input type="date" class="form-control" id="invoiceDate" required>
                   </div>
-                  <div class="col-md-6">
-                    <label class="form-label">Status</label>
-                    <select class="form-select" id="invoiceStatus">
-                      <option value="Paid">Paid</option>
-                      <option selected value="Pending">Pending</option>
-                      <option value="Overdue">Overdue</option>
-                    </select>
+
+                  <div class="col-md-4">
+                    <label class="form-label">Grand Total (UGX)</label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-light text-primary fw-bold">UGX</span>
+                      <input type="text" class="form-control fw-bold text-primary" id="invoiceAmount" readonly value="0" data-raw-total="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label fw-bold">Amount Paid</label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-light">UGX</span>
+                      <input type="number" class="form-control" id="amountPaid" min="0" value="0">
+                    </div>
+                  </div>
+                  <div class="col-md-4">
+                    <label class="form-label">Remaining Balance</label>
+                    <div class="input-group">
+                      <span class="input-group-text bg-light text-danger fw-bold">UGX</span>
+                      <input type="text" class="form-control fw-bold text-danger bg-white" id="invoiceBalance" readonly value="0">
+                    </div>
                   </div>
                 </div>
                 
@@ -207,7 +214,13 @@
               }
               document.getElementById("customerName").value = inv.customerName || (inv.customer ? inv.customer.name : '');
               document.getElementById("invoiceDate").value = dateVal;
-              document.getElementById("invoiceStatus").value = inv.status;
+              
+              if (inv.amountPaid !== undefined) {
+                  document.getElementById("amountPaid").value = inv.amountPaid;
+              } else {
+                  // Legacy Fallback mapping
+                  document.getElementById("amountPaid").value = inv.status === 'Paid' ? (inv.totalAmount || inv.amount) : 0;
+              }
               
               if (inv.items && Array.isArray(inv.items)) {
                   cartItems = inv.items.map(item => ({
@@ -280,6 +293,15 @@
           renderCart();
       };
 
+      document.getElementById("amountPaid").addEventListener("input", calculateBalance);
+
+      function calculateBalance() {
+          const totalRaw = parseFloat(document.getElementById("invoiceAmount").dataset.rawTotal || 0);
+          const paidRaw = parseFloat(document.getElementById("amountPaid").value || 0);
+          const balance = Math.max(0, totalRaw - paidRaw);
+          document.getElementById("invoiceBalance").value = balance.toLocaleString('en-US');
+      }
+
       function renderCart() {
           const tbody = document.getElementById("cartTableBody");
           tbody.innerHTML = "";
@@ -306,12 +328,14 @@
               `;
           });
           document.getElementById("invoiceAmount").value = grandTotal.toLocaleString('en-US');
+          document.getElementById("invoiceAmount").dataset.rawTotal = grandTotal;
+          calculateBalance();
       }
 
       document.getElementById("saveInvoice").addEventListener("click", async function () {
         const name = document.getElementById("customerName").value.trim();
         const date = document.getElementById("invoiceDate").value;
-        const status = document.getElementById("invoiceStatus").value;
+        const amountPaid = document.getElementById("amountPaid").value;
 
         if (!name || !date) return alert("Please fill all invoice details.");
         if (cartItems.length === 0) return alert("Please add at least one item to the cart before saving.");
@@ -343,7 +367,7 @@
           customer: customerId,
           customerName: name,
           date, 
-          status,
+          amountPaid,
           items: formattedItems
         };
 

@@ -177,22 +177,31 @@
         }
 
         // Summary
-        const subtotal = Number(inv.amount);
-        const balance = subtotal - totalPaid;
+        const totalAmount = inv.totalAmount !== undefined ? inv.totalAmount : (inv.amount || 0);
+        let amountPaid = inv.amountPaid !== undefined ? inv.amountPaid : (inv.status === 'Paid' ? totalAmount : 0);
+        let balance = inv.balance !== undefined ? inv.balance : Math.max(0, totalAmount - amountPaid);
+
+        // Fallback calculation for ancient receipts
+        if (inv.amountPaid === undefined && totalPaid > amountPaid) {
+            amountPaid = totalPaid;
+            balance = Math.max(0, totalAmount - amountPaid);
+        }
+
         const summary = document.getElementById('summarySection');
 
         let statusClass = 'pending';
         if (inv.status === 'Paid') statusClass = 'paid';
-        else if (inv.status === 'Overdue') statusClass = 'overdue';
+        else if (inv.status === 'Overdue' || inv.status === 'Unpaid') statusClass = 'overdue';
+        else if (inv.status === 'Partial') statusClass = 'pending'; // CSS reuse for yellow/orange
 
         summary.innerHTML = `
-        <p><strong>Subtotal:</strong> UGX ${formatCurrency(subtotal)}</p>
-        ${totalPaid > 0 ? `<p class="paid"><strong>Cash Paid:</strong> UGX ${formatCurrency(totalPaid)}</p>` : ''}
+        <p><strong>Grand Total:</strong> UGX ${formatCurrency(totalAmount)}</p>
+        ${amountPaid > 0 ? `<p class="paid"><strong>Amount Paid:</strong> UGX ${formatCurrency(amountPaid)}</p>` : ''}
         <p class="amount-highlight ${statusClass}">
-          <strong>${inv.status === 'Paid' ? 'Fully Paid' : 'Balance Due'}:</strong>
-          UGX ${formatCurrency(balance > 0 ? balance : 0)}
+          <strong>${inv.status === 'Paid' ? 'Fully Paid' : 'Remaining Balance'}:</strong>
+          UGX ${formatCurrency(balance)}
         </p>
-        <p style="margin-top:8px;font-size:13px;color:#aaa;">Status: <span class="${statusClass}" style="text-transform:uppercase;">${inv.status}</span></p>
+        <p style="margin-top:8px;font-size:13px;color:#000;font-weight:bold;">Status: <span class="${statusClass}" style="text-transform:uppercase;">${inv.status}</span></p>
       `;
 
       } catch (err) {

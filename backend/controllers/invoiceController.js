@@ -17,11 +17,13 @@ const createInvoice = catchAsync(async (req, res, next) => {
   session.startTransaction();
 
   try {
-    let { number, customer, customerName, date, items, status } = req.body;
+    let { number, customer, customerName, date, items, amountPaid } = req.body;
     
     if (!number || !items || !Array.isArray(items) || items.length === 0) {
       throw new AppError('Invoice number and at least one cart item are required', 400);
     }
+    
+    amountPaid = Number(amountPaid) || 0;
 
     let calculatedAmount = 0;
     const validatedItems = [];
@@ -59,14 +61,29 @@ const createInvoice = catchAsync(async (req, res, next) => {
       customer = existingCustomer._id;
     }
 
+    if (amountPaid > calculatedAmount) {
+      throw new AppError('Amount paid cannot exceed the grand total.', 400);
+    }
+
+    const calculatedBalance = calculatedAmount - amountPaid;
+    
+    let calculatedStatus = 'Unpaid';
+    if (calculatedBalance === 0) {
+      calculatedStatus = 'Paid';
+    } else if (amountPaid > 0 && calculatedBalance > 0) {
+      calculatedStatus = 'Partial';
+    }
+
     const newInvoice = new Invoice({
       number, 
       customer, 
       customerName, 
       date, 
       items: validatedItems,
-      amount: calculatedAmount, 
-      status, 
+      totalAmount: calculatedAmount, 
+      amountPaid: amountPaid,
+      balance: calculatedBalance,
+      status: calculatedStatus, 
       createdBy: req.user._id
     });
     
@@ -81,8 +98,8 @@ const createInvoice = catchAsync(async (req, res, next) => {
       );
     }
 
-    if (customer && (status === 'Pending' || status === 'Overdue')) {
-      await Customer.findByIdAndUpdate(customer, { $inc: { balance: calculatedAmount } }, { session, new: true });
+    if (customer && calculatedBalance > 0) {
+      await Customer.findByIdAndUpdate(customer, { $inc: { balance: calculatedBalance } }, { session, new: true });
     }
 
     await session.commitTransaction();
@@ -103,7 +120,36 @@ const updateInvoice = catchAsync(async (req, res, next) => {
   const invoice = await Invoice.findById(req.params.id);
   if (!invoice) return next(new AppError('Invoice not found', 404));
 
+  let customerBalanceAdjustment = 0;
+
+  if (req.body.amountPaid !== undefined) {
+    const newAmountPaid = Number(req.body.amountPaid);
+    if (newAmountPaid > invoice.totalAmount) {
+       return next(new AppError('Amount paid cannot exceed the grand total.', 400));
+    }
+    
+    // Difference between new payment total and old payment total
+    const paymentDifference = newAmountPaid - invoice.amountPaid;
+    // That means the customer owes LESS now, so their balance DECREASES
+    customerBalanceAdjustment = -paymentDifference;
+
+    const newBalance = invoice.totalAmount - newAmountPaid;
+    
+    let newStatus = 'Unpaid';
+    if (newBalance === 0) newStatus = 'Paid';
+    else if (newAmountPaid > 0 && newBalance > 0) newStatus = 'Partial';
+
+    req.body.balance = newBalance;
+    req.body.status = newStatus;
+  }
+
   const updatedInvoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
+  
+  // Safely persist to Customer table outside the primary document save
+  if (customerBalanceAdjustment !== 0 && invoice.customer) {
+      await Customer.findByIdAndUpdate(invoice.customer, { $inc: { balance: customerBalanceAdjustment } });
+  }
+
   res.json(updatedInvoice);
 });
 

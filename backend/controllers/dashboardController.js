@@ -14,10 +14,20 @@ const getDashboardStats = catchAsync(async (req, res, next) => {
   let overdueTotal = 0;
 
   invoices.forEach(inv => {
-    totalSales += inv.amount;
-    if (inv.status === 'Paid') paidTotal += inv.amount;
-    if (inv.status === 'Pending') pendingTotal += inv.amount;
-    if (inv.status === 'Overdue') overdueTotal += inv.amount;
+    const amt = inv.totalAmount !== undefined ? inv.totalAmount : (inv.amount || 0);
+    totalSales += amt;
+
+    // Modern POS tracking format
+    if (inv.amountPaid !== undefined && inv.balance !== undefined) {
+      paidTotal += inv.amountPaid;
+      pendingTotal += inv.balance;
+    } else {
+      // Ancient legacy format fallback
+      if (inv.status === 'Paid') paidTotal += amt;
+      if (inv.status === 'Pending') pendingTotal += amt;
+    }
+
+    if (inv.status === 'Overdue') overdueTotal += amt;
   });
 
   const lowStock = products.filter(p => p.stock > 0 && p.stock <= 10).length;

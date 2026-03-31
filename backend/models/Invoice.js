@@ -12,8 +12,11 @@ const invoiceSchema = new mongoose.Schema({
     subtotal: { type: Number, required: true }
   }],
   date: { type: String }, 
-  amount: { type: Number, required: true },
-  status: { type: String, enum: ['Paid', 'Pending', 'Overdue'], default: 'Pending' },
+  amount: { type: Number }, // Deprecated legacy field
+  totalAmount: { type: Number, required: true, default: 0 },
+  amountPaid: { type: Number, required: true, default: 0 },
+  balance: { type: Number, required: true, default: 0 },
+  status: { type: String, enum: ['Paid', 'Partial', 'Unpaid', 'Pending', 'Overdue'], default: 'Unpaid' },
   createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
   approved: { type: Boolean, default: null } // null indicates pending manager approval
 }, { timestamps: true });
