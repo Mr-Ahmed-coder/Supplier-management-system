@@ -12,6 +12,7 @@ const invoiceSchema = new mongoose.Schema({
     subtotal: { type: Number, required: true }
   }],
   date: { type: String }, 
+  dueDate: { type: Date },
   amount: { type: Number }, // Deprecated legacy field
   totalAmount: { type: Number, required: true, default: 0 },
   amountPaid: { type: Number, required: true, default: 0 },

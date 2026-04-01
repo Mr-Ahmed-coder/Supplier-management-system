@@ -18,7 +18,7 @@ const createInvoice = catchAsync(async (req, res, next) => {
   session.startTransaction();
 
   try {
-    let { number, customer, customerName, date, items, amountPaid } = req.body;
+    let { number, customer, customerName, date, dueDate, items, amountPaid } = req.body;
     
     if (!number || !items || !Array.isArray(items) || items.length === 0) {
       throw new AppError('Invoice number and at least one cart item are required', 400);
@@ -68,11 +68,16 @@ const createInvoice = catchAsync(async (req, res, next) => {
 
     const calculatedBalance = calculatedAmount - amountPaid;
     
-    let calculatedStatus = 'Unpaid';
+    let calculatedStatus = 'Pending'; // Default
     if (calculatedBalance === 0) {
       calculatedStatus = 'Paid';
-    } else if (amountPaid > 0 && calculatedBalance > 0) {
-      calculatedStatus = 'Partial';
+    } else {
+      const isOverdue = dueDate && new Date() > new Date(dueDate);
+      if (isOverdue) {
+        calculatedStatus = 'Overdue';
+      } else if (amountPaid > 0) {
+        calculatedStatus = 'Partial';
+      }
     }
 
     const newInvoice = new Invoice({
@@ -80,6 +85,7 @@ const createInvoice = catchAsync(async (req, res, next) => {
       customer, 
       customerName, 
       date, 
+      dueDate,
       items: validatedItems,
       totalAmount: calculatedAmount, 
       amountPaid: amountPaid,
@@ -123,8 +129,10 @@ const updateInvoice = catchAsync(async (req, res, next) => {
 
   let customerBalanceAdjustment = 0;
 
-  if (req.body.amountPaid !== undefined) {
-    const newAmountPaid = Number(req.body.amountPaid);
+  if (req.body.amountPaid !== undefined || req.body.dueDate !== undefined) {
+    const rawPaid = req.body.amountPaid !== undefined ? req.body.amountPaid : invoice.amountPaid;
+    const newAmountPaid = Number(rawPaid);
+
     if (newAmountPaid > invoice.totalAmount) {
        return next(new AppError('Amount paid cannot exceed the grand total.', 400));
     }
@@ -136,9 +144,15 @@ const updateInvoice = catchAsync(async (req, res, next) => {
 
     const newBalance = invoice.totalAmount - newAmountPaid;
     
-    let newStatus = 'Unpaid';
-    if (newBalance === 0) newStatus = 'Paid';
-    else if (newAmountPaid > 0 && newBalance > 0) newStatus = 'Partial';
+    let newStatus = 'Pending';
+    if (newBalance === 0) { 
+      newStatus = 'Paid'; 
+    } else {
+      const targetDueDate = req.body.dueDate !== undefined ? req.body.dueDate : invoice.dueDate;
+      const isOverdue = targetDueDate && new Date() > new Date(targetDueDate);
+      if (isOverdue) newStatus = 'Overdue';
+      else if (newAmountPaid > 0) newStatus = 'Partial';
+    }
 
     req.body.balance = newBalance;
     req.body.status = newStatus;
