@@ -4,7 +4,16 @@ const Customer = require('../models/Customer');
 const catchAsync = require('../utils/catchAsync');
 
 const getDashboardStats = catchAsync(async (req, res, next) => {
-  const invoices = await Invoice.find({});
+  const isAdmin = req.user && req.user.role === 'Admin';
+  
+  let invoiceQuery = {};
+  if (!isAdmin) {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    invoiceQuery = { createdAt: { $gte: startOfDay } };
+  }
+
+  const invoices = await Invoice.find(invoiceQuery);
   const products = await Product.find({});
   const customers = await Customer.find({});
   
