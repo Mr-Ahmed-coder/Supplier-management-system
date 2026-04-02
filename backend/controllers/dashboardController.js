@@ -19,7 +19,7 @@ const getDashboardStats = catchAsync(async (req, res, next) => {
   
   let totalSales = 0;
   let paidTotal = 0;
-  let pendingTotal = 0;
+  let partialTotal = 0;
   let overdueTotal = 0;
 
   invoices.forEach(inv => {
@@ -29,11 +29,11 @@ const getDashboardStats = catchAsync(async (req, res, next) => {
     // Modern POS tracking format
     if (inv.amountPaid !== undefined && inv.balance !== undefined) {
       paidTotal += inv.amountPaid;
-      pendingTotal += inv.balance;
+      partialTotal += inv.balance;
     } else {
       // Ancient legacy format fallback
       if (inv.status === 'Paid') paidTotal += amt;
-      if (inv.status === 'Pending') pendingTotal += amt;
+      if (inv.status === 'Pending' || inv.status === 'Partial') partialTotal += amt;
     }
 
     if (inv.status === 'Overdue') overdueTotal += amt;
@@ -47,7 +47,7 @@ const getDashboardStats = catchAsync(async (req, res, next) => {
   res.json({
     totalSales,
     paidTotal,
-    pendingTotal,
+    partialTotal,
     overdueTotal,
     lowStockAlerts: lowStock,
     outOfStockAlerts: outOfStock,

@@ -68,16 +68,12 @@ const createInvoice = catchAsync(async (req, res, next) => {
 
     const calculatedBalance = calculatedAmount - amountPaid;
     
-    let calculatedStatus = 'Pending'; // Default
+    let calculatedStatus = 'Partial'; // Default
     if (calculatedBalance === 0) {
       calculatedStatus = 'Paid';
     } else {
       const isOverdue = dueDate && new Date() > new Date(dueDate);
-      if (isOverdue) {
-        calculatedStatus = 'Overdue';
-      } else if (amountPaid > 0) {
-        calculatedStatus = 'Partial';
-      }
+      if (isOverdue) calculatedStatus = 'Overdue';
     }
 
     const newInvoice = new Invoice({
@@ -146,14 +142,13 @@ const updateInvoice = catchAsync(async (req, res, next) => {
 
     const newBalance = invoice.totalAmount - newAmountPaid;
     
-    let newStatus = 'Pending';
+    let newStatus = 'Partial';
     if (newBalance === 0) { 
       newStatus = 'Paid'; 
     } else {
       const targetDueDate = req.body.dueDate !== undefined ? req.body.dueDate : invoice.dueDate;
       const isOverdue = targetDueDate && new Date() > new Date(targetDueDate);
       if (isOverdue) newStatus = 'Overdue';
-      else if (newAmountPaid > 0) newStatus = 'Partial';
     }
 
     req.body.balance = newBalance;
@@ -190,8 +185,8 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
 
   if (status === 'Paid') {
     queryObj.status = 'Paid';
-  } else if (status === 'Pending') {
-    queryObj.status = { $in: ['Pending', 'Overdue', 'Unpaid'] };
+  } else if (status === 'Partial') {
+    queryObj.status = { $in: ['Partial', 'Overdue', 'Unpaid', 'Pending'] };
   }
 
   const invoices = await Invoice.find(queryObj)

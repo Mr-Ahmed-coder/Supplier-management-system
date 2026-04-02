@@ -210,7 +210,7 @@ Chart.defaults.color = '#64748b';
 
 function renderStatusChart() {
   const paid = invoices.filter(i => i.status === "Paid").length;
-  const pending = invoices.filter(i => i.status === "Pending").length;
+  const pending = invoices.filter(i => i.status === "Pending" || i.status === "Partial" || i.status === "Unpaid").length;
   const overdue = invoices.filter(i => i.status === "Overdue").length;
 
   const ctx = document.getElementById("statusChart").getContext("2d");
@@ -227,7 +227,7 @@ function renderStatusChart() {
   statusChartObj = new Chart(ctx, {
     type: "doughnut",
     data: {
-      labels: ["Paid", "Pending", "Overdue"],
+      labels: ["Paid", "Partial", "Overdue"],
       datasets: [{
         data: [paid, pending, overdue],
         backgroundColor: ["#10b981", "#f59e0b", "#ef4444"],

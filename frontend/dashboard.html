@@ -110,8 +110,8 @@
                   <span class="fw-bold text-success" id="dashPaidTotal">UGX 0</span>
                 </div>
                 <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                  <span class="text-warning fw-semibold">Pending</span>
-                  <span class="fw-bold text-warning" id="dashPendingTotal">UGX 0</span>
+                  <span class="text-warning fw-semibold">Partial</span>
+                  <span class="fw-bold text-warning" id="dashPartialTotal">UGX 0</span>
                 </div>
                 <div class="d-flex justify-content-between">
                   <span class="text-danger fw-semibold">Overdue</span>
@@ -166,7 +166,7 @@ async function loadDashboardData() {
         document.getElementById("dashInvoiceCount").innerText = stats.invoiceCount;
         document.getElementById("dashProductCount").innerText = stats.productCount;
         document.getElementById("dashPaidTotal").innerText = `UGX ${Number(stats.paidTotal).toLocaleString('en-US')}`;
-        document.getElementById("dashPendingTotal").innerText = `UGX ${Number(stats.pendingTotal).toLocaleString('en-US')}`;
+        document.getElementById("dashPartialTotal").innerText = `UGX ${Number(stats.partialTotal).toLocaleString('en-US')}`;
         document.getElementById("dashOverdueTotal").innerText = `UGX ${Number(stats.overdueTotal).toLocaleString('en-US')}`;
         document.getElementById("lowStockAlerts").innerText = `${stats.lowStockAlerts} Items`;
         document.getElementById("alertCount").innerText = `${stats.lowStockAlerts + stats.outOfStockAlerts} Issues`;
@@ -194,15 +194,16 @@ async function loadDashboardData() {
       const recent = invoices.slice(-5).reverse();
       tbody.innerHTML = "";
       recent.forEach(inv => {
+        const displayStatus = (inv.status === "Pending" || inv.status === "Unpaid") ? "Partial" : inv.status;
         const badgeClass =
-          inv.status === "Paid" ? "status-paid" :
-            inv.status === "Pending" ? "status-pending" : "status-overdue";
+          displayStatus === "Paid" ? "status-paid" :
+            displayStatus === "Partial" ? "status-pending" : "status-overdue";
         tbody.innerHTML += `
       <tr>
         <td>${escapeHTML(inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString())}</td>
         <td class="fw-semibold text-dark">${escapeHTML(inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'))}</td>
         <td class="fw-bold text-primary">UGX ${escapeHTML(Number(inv.amount).toLocaleString('en-US'))}</td>
-        <td><span class="badge-status ${escapeHTML(badgeClass)}">${escapeHTML(inv.status)}</span></td>
+        <td><span class="badge-status ${escapeHTML(badgeClass)}">${escapeHTML(displayStatus)}</span></td>
       </tr>
     `;
       });
