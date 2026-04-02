@@ -36,7 +36,7 @@
           <h3 class="fw-bold mb-1">Suppliers</h3>
           <p class="text-muted mb-0">Manage inventory suppliers and external vendors</p>
         </div>
-        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#supplierModal">
+        <button class="btn btn-primary admin-only" data-bs-toggle="modal" data-bs-target="#supplierModal">
           <i class="bi bi-plus-lg me-1"></i> Add Supplier
         </button>
       </div>
@@ -126,11 +126,21 @@ async function fetchSuppliers() {
         headers: getAuthHeaders(),
         cache: "no-store" 
     });
+
+    if (res.status === 401 || res.status === 403) {
+      document.getElementById("supplierTable").innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4"><i class="bi bi-shield-lock-fill fs-3 d-block mb-2"></i>Access restricted. You do not have permission to view suppliers.</td></tr>`;
+      document.getElementById("searchSupplier").style.display = 'none';
+      suppliers = [];
+      return;
+    }
+
+    if (!res.ok) throw new Error("Server error");
+
     suppliers = await res.json();
     renderSuppliers();
   } catch(err) { 
-      alert("Error fetching suppliers: " + err.message);
       console.error(err); 
+      document.getElementById("supplierTable").innerHTML = `<tr><td colspan="5" class="text-center text-danger py-4">Unable to load data.</td></tr>`;
   }
 }
 
