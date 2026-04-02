@@ -359,7 +359,7 @@
             price: item.price
         }));
 
-        const matchingCust = customers.find(c => c.name.toLowerCase() === name.toLowerCase());
+        const matchingCust = Array.isArray(customers) ? customers.find(c => c.name && c.name.toLowerCase() === name.toLowerCase()) : null;
         const customerId = matchingCust ? matchingCust._id : null;
 
         let invoiceNumber = '';
