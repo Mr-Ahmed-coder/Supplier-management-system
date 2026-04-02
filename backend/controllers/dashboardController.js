@@ -44,18 +44,23 @@ const getDashboardStats = catchAsync(async (req, res, next) => {
 
   const totalOutstanding = customers.reduce((acc, c) => acc + (c.balance || 0), 0);
 
-  res.json({
-    totalSales,
-    paidTotal,
-    partialTotal,
-    overdueTotal,
+  const payload = {
     lowStockAlerts: lowStock,
     outOfStockAlerts: outOfStock,
-    outstandingDebts: totalOutstanding,
     invoiceCount: invoices.length,
     productCount: products.length,
     customerCount: customers.length
-  });
+  };
+
+  if (isAdmin) {
+    payload.totalSales = totalSales;
+    payload.paidTotal = paidTotal;
+    payload.partialTotal = partialTotal;
+    payload.overdueTotal = overdueTotal;
+    payload.outstandingDebts = totalOutstanding;
+  }
+
+  res.json(payload);
 });
 
 module.exports = { getDashboardStats };

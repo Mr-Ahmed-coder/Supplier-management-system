@@ -35,7 +35,7 @@
 
         <!-- Stats Row -->
         <div class="row g-4 mb-4">
-          <div class="col-xl-3 col-md-6">
+          <div class="col-xl-3 col-md-6 admin-only">
             <div class="stat-card bg-sales shadow-sm">
               <h6>Total Sales Today</h6>
               <h3 id="totalSales">UGX 0</h3>
@@ -47,7 +47,7 @@
               <h3 id="lowStockAlerts">0 Items</h3>
             </div>
           </div>
-          <div class="col-xl-3 col-md-6">
+          <div class="col-xl-3 col-md-6 admin-only">
             <div class="stat-card bg-debts shadow-sm">
               <h6>Outstanding Debts</h6>
               <h3 id="outstandingDebts">UGX 0</h3>
@@ -105,17 +105,19 @@
                   <span class="text-muted">Cosmetics Items</span>
                   <span class="fw-bold" id="dashProductCount">0</span>
                 </div>
-                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                  <span class="text-success fw-semibold">Paid</span>
-                  <span class="fw-bold text-success" id="dashPaidTotal">UGX 0</span>
-                </div>
-                <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
-                  <span class="text-warning fw-semibold">Partial</span>
-                  <span class="fw-bold text-warning" id="dashPartialTotal">UGX 0</span>
-                </div>
-                <div class="d-flex justify-content-between">
-                  <span class="text-danger fw-semibold">Overdue</span>
-                  <span class="fw-bold text-danger" id="dashOverdueTotal">UGX 0</span>
+                <div class="admin-only">
+                  <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                    <span class="text-success fw-semibold">Paid</span>
+                    <span class="fw-bold text-success" id="dashPaidTotal">UGX 0</span>
+                  </div>
+                  <div class="d-flex justify-content-between border-bottom pb-2 mb-2">
+                    <span class="text-warning fw-semibold">Partial</span>
+                    <span class="fw-bold text-warning" id="dashPartialTotal">UGX 0</span>
+                  </div>
+                  <div class="d-flex justify-content-between">
+                    <span class="text-danger fw-semibold">Overdue</span>
+                    <span class="fw-bold text-danger" id="dashOverdueTotal">UGX 0</span>
+                  </div>
                 </div>
               </div>
             </div>
@@ -143,17 +145,8 @@
 const userStr = localStorage.getItem('user');
 const currentUser = userStr ? JSON.parse(userStr) : null;
 
-if (!currentUser || currentUser.role !== 'Admin') {
-  document.querySelector('.container-fluid').innerHTML = 
-    `<div class="alert alert-danger mx-auto mt-5 shadow-sm" style="max-width:500px">
-        <h4 class="alert-heading fw-bold"><i class="bi bi-shield-lock-fill text-danger me-2"></i> Access Denied</h4>
-        <p>Your user role does not have permission to view the system dashboard and analytics.</p>
-        <hr>
-        <a href="inventory.html" class="btn btn-outline-danger w-100">Go to Inventory</a>
-    </div>`;
-} else {
-  loadDashboardData();
-}
+const isAdmin = currentUser && currentUser.role === 'Admin';
+loadDashboardData();
 
 async function loadDashboardData() {
   try {
@@ -161,13 +154,16 @@ async function loadDashboardData() {
         if (!statsRes.ok) throw new Error('Failed to fetch dashboard stats');
         const stats = await statsRes.json();
 
-        document.getElementById("totalSales").innerText = `UGX ${Number(stats.totalSales).toLocaleString('en-US')}`;
-        document.getElementById("outstandingDebts").innerText = `UGX ${Number(stats.outstandingDebts).toLocaleString('en-US')}`;
         document.getElementById("dashInvoiceCount").innerText = stats.invoiceCount;
         document.getElementById("dashProductCount").innerText = stats.productCount;
-        document.getElementById("dashPaidTotal").innerText = `UGX ${Number(stats.paidTotal).toLocaleString('en-US')}`;
-        document.getElementById("dashPartialTotal").innerText = `UGX ${Number(stats.partialTotal).toLocaleString('en-US')}`;
-        document.getElementById("dashOverdueTotal").innerText = `UGX ${Number(stats.overdueTotal).toLocaleString('en-US')}`;
+        
+        if (isAdmin) {
+          document.getElementById("totalSales").innerText = `UGX ${Number(stats.totalSales).toLocaleString('en-US')}`;
+          document.getElementById("outstandingDebts").innerText = `UGX ${Number(stats.outstandingDebts).toLocaleString('en-US')}`;
+          document.getElementById("dashPaidTotal").innerText = `UGX ${Number(stats.paidTotal).toLocaleString('en-US')}`;
+          document.getElementById("dashPartialTotal").innerText = `UGX ${Number(stats.partialTotal).toLocaleString('en-US')}`;
+          document.getElementById("dashOverdueTotal").innerText = `UGX ${Number(stats.overdueTotal).toLocaleString('en-US')}`;
+        }
         document.getElementById("lowStockAlerts").innerText = `${stats.lowStockAlerts} Items`;
         document.getElementById("alertCount").innerText = `${stats.lowStockAlerts + stats.outOfStockAlerts} Issues`;
 
