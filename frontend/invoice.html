@@ -134,7 +134,12 @@ function renderInvoices() {
           ${phone ? `<br><small class="text-muted"><i class="bi bi-telephone"></i> ${phone}</small>` : ''}
           ${inv.location ? `<br><small class="text-muted"><i class="bi bi-geo-alt"></i> ${inv.location}</small>` : ''}
         </td>
-        <td>${inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}</td>
+        <td>
+          <div class="d-flex flex-column">
+            <span>${inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}</span>
+            ${inv.dueDate ? `<small class="text-warning fw-bold mt-1" style="font-size: 0.70rem;">Expected: ${new Date(inv.dueDate).toLocaleDateString()}</small>` : ''}
+          </div>
+        </td>
         <td class="fw-bold">UGX ${Number(totalAmount).toLocaleString('en-US')}</td>
         <td class="text-success text-opacity-75 fw-bold">UGX ${Number(amountPaid).toLocaleString('en-US')}</td>
         <td class="text-danger fw-bold">UGX ${Number(balance).toLocaleString('en-US')}</td>

@@ -35,7 +35,7 @@
     <div class="header">
       <h1 style="margin-bottom: 5px;">Tumi Cosmetics</h1>
       <h3 id="invoiceNumber" style="margin-bottom: 6px; color: white;">INVOICE #</h3>
-      <p id="invoiceDates">Date: --- | Due: ---</p>
+      <p id="invoiceDates">Date: --- | Expected Payment: ---</p>
     </div>
 
     <div class="customer-info">
@@ -92,11 +92,15 @@
       return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    function getDueDate(dateStr) {
-      if (!dateStr) return '---';
-      const d = new Date(dateStr);
+    function getExpectedPaymentDate(inv) {
+      if (inv.dueDate) {
+        const d = new Date(inv.dueDate);
+        if (!isNaN(d)) return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
+      }
+      if (!inv.date && !inv.createdAt) return '---';
+      const d = new Date(inv.date || inv.createdAt);
       if (isNaN(d)) return '---';
-      d.setDate(d.getDate() + 30); // Due 30 days after issue
+      d.setDate(d.getDate() + 30); // Fallback: 30 days after issue
       return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
@@ -127,7 +131,7 @@
         // Header
         document.getElementById('invoiceNumber').textContent = `INVOICE #${inv.number}`;
         document.getElementById('invoiceDates').textContent =
-          `Date: ${formatDate(inv.date || inv.createdAt)} | Due: ${getDueDate(inv.date || inv.createdAt)}`;
+          `Date: ${formatDate(inv.date || inv.createdAt)} | Expected Payment: ${getExpectedPaymentDate(inv)}`;
         document.title = `Invoice ${inv.number}`;
 
         // Customer

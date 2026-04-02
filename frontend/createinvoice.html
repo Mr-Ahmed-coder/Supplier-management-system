@@ -68,6 +68,10 @@
                     <label class="form-label">Date Issued</label>
                     <input type="date" class="form-control" id="invoiceDate" required>
                   </div>
+                  <div class="col-md-4">
+                    <label class="form-label text-muted fw-bold">Expected Payment Date (Optional)</label>
+                    <input type="date" class="form-control border-warning" id="invoiceDueDate">
+                  </div>
 
                   <div class="col-md-4">
                     <label class="form-label">Grand Total (UGX)</label>
@@ -225,6 +229,11 @@
               document.getElementById("customerLocation").value = inv.location || '';
               document.getElementById("invoiceDate").value = dateVal;
               
+              if (inv.dueDate) {
+                const dd = new Date(inv.dueDate);
+                if (!isNaN(dd)) document.getElementById("invoiceDueDate").value = dd.toISOString().split('T')[0];
+              }
+              
               if (inv.amountPaid !== undefined) {
                   document.getElementById("amountPaid").value = inv.amountPaid;
               } else {
@@ -347,6 +356,7 @@
         const phone = document.getElementById("customerPhone").value.trim();
         const location = document.getElementById("customerLocation").value.trim();
         const date = document.getElementById("invoiceDate").value;
+        const dueDate = document.getElementById("invoiceDueDate").value;
         const amountPaid = document.getElementById("amountPaid").value;
 
         if (!name || !date) return alert("Please fill all required invoice details.");
@@ -381,6 +391,7 @@
           customerPhone: phone,
           location,
           date, 
+          dueDate: dueDate ? dueDate : undefined,
           amountPaid,
           items: formattedItems
         };
