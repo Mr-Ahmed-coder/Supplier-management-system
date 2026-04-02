@@ -117,7 +117,7 @@ function renderInvoices() {
     const balance = inv.balance !== undefined ? inv.balance : (inv.status === 'Paid' ? 0 : totalAmount);
 
     const phone = inv.customerPhone || (inv.customer ? inv.customer.phone : '');
-    const callHtml = phone ? `<a href="tel:${phone}" class="btn btn-sm btn-outline-info me-1" title="Call Customer (${phone})"><i class="bi bi-telephone-fill"></i></a>` : '';
+    const callHtml = phone ? `<a href="tel:${phone}" class="btn btn-sm btn-outline-success me-1" title="Call Customer"><i class="bi bi-telephone-fill"></i> Call</a>` : '';
 
     let badgeClass = "badge-status text-white ";
     if (inv.status === "Paid") badgeClass += "bg-success";
@@ -129,6 +129,7 @@ function renderInvoices() {
         <td class="fw-semibold text-dark">${inv.number}</td>
         <td>
           ${inv.customerName || (inv.customer ? inv.customer.name : 'Unknown')}
+          ${phone ? `<br><small class="text-muted"><i class="bi bi-telephone"></i> ${phone}</small>` : ''}
           ${inv.location ? `<br><small class="text-muted"><i class="bi bi-geo-alt"></i> ${inv.location}</small>` : ''}
         </td>
         <td>${inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}</td>
