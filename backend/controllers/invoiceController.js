@@ -206,6 +206,9 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
     if (inv.date) dateStr = new Date(inv.date).toLocaleDateString();
     else if (inv.createdAt) dateStr = new Date(inv.createdAt).toLocaleDateString();
 
+    let expectedStr = 'Not provided';
+    if (inv.dueDate) expectedStr = new Date(inv.dueDate).toLocaleDateString();
+
     return {
       'Invoice Number': inv.number,
       'Customer Name': inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'),
@@ -215,11 +218,12 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
       'Amount Paid': amountPaid,
       'Balance': balance,
       'Status': inv.status,
-      'Date ISSUED': dateStr
+      'Date ISSUED': dateStr,
+      'Expected Date': expectedStr
     };
   });
 
-  const fields = ['Invoice Number', 'Customer Name', 'Customer Phone', 'Invoice Location', 'Total Amount', 'Amount Paid', 'Balance', 'Status', 'Date ISSUED'];
+  const fields = ['Invoice Number', 'Customer Name', 'Customer Phone', 'Invoice Location', 'Total Amount', 'Amount Paid', 'Balance', 'Status', 'Date ISSUED', 'Expected Date'];
   const json2csvParser = new Parser({ fields });
   const csvFormat = json2csvParser.parse(exportData);
 
