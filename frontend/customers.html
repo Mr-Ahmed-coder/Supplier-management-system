@@ -192,11 +192,21 @@ async function fetchCustomers() {
         headers: getAuthHeaders(),
         cache: "no-store" 
     });
+
+    if (res.status === 401 || res.status === 403) {
+      document.getElementById("customerTable").innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4"><i class="bi bi-shield-lock-fill fs-3 d-block mb-2"></i>You do not have permission to view this page.</td></tr>`;
+      customers = [];
+      updateSummary();
+      return;
+    }
+
+    if (!res.ok) throw new Error("Server error");
+
     customers = await res.json();
     renderCustomers();
   } catch(err) { 
-      alert("Error fetching customers: " + err.message);
       console.error(err); 
+      document.getElementById("customerTable").innerHTML = `<tr><td colspan="7" class="text-center text-danger py-4">Unable to load data.</td></tr>`;
   }
 }
 
@@ -283,11 +293,9 @@ saveBtn.addEventListener("click", async function () {
       clearForm();
       bootstrap.Modal.getOrCreateInstance(document.getElementById("customerModal")).hide();
     } else {
-      const errData = await res.json().catch(() => ({}));
-      alert(`Error saving customer: ${errData.message || res.statusText}. Check permissions.`);
+      console.error("Save blocked.");
     }
   } catch(err) { 
-      alert(`Network/System Error: ${err.message}`);
       console.error(err); 
   }
 });
@@ -339,7 +347,6 @@ async function deleteCustomer(id) {
     try {
       const res = await fetch(`${API_URL}/customers/${id}`, { method: 'DELETE', headers: getAuthHeaders() });
       if(res.ok) fetchCustomers();
-      else alert("Restricted: Admins only.");
     } catch(err) { console.error(err); }
   }
 }
