@@ -100,4 +100,34 @@ const updateUserRole = catchAsync(async (req, res, next) => {
   res.json({ message: 'User role updated', role: updatedUser.role });
 });
 
-module.exports = { registerUser, loginUser, getMe, getUsers, deleteUser, updateUserRole };
+// @desc    Change user password
+// @route   POST /api/users/change-password
+// @access  Private
+const changePassword = catchAsync(async (req, res, next) => {
+  const { currentPassword, newPassword, confirmPassword } = req.body;
+  
+  if (!currentPassword || !newPassword || !confirmPassword) {
+    return next(new AppError('Please provide current password, new password, and confirm password', 400));
+  }
+  
+  if (newPassword !== confirmPassword) {
+    return next(new AppError('New passwords do not match', 400));
+  }
+  
+  if (newPassword.length < 6) {
+    return next(new AppError('New password must be at least 6 characters long', 400));
+  }
+
+  const user = await User.findById(req.user._id);
+
+  if (!(await user.matchPassword(currentPassword))) {
+    return next(new AppError('Current password is incorrect', 401));
+  }
+
+  user.password = newPassword;
+  await user.save();
+
+  res.json({ message: 'Password changed successfully' });
+});
+
+module.exports = { registerUser, loginUser, getMe, getUsers, deleteUser, updateUserRole, changePassword };
