@@ -146,7 +146,12 @@ const userStr = localStorage.getItem('user');
 const currentUser = userStr ? JSON.parse(userStr) : null;
 
 const isAdmin = currentUser && currentUser.role === 'Admin';
-loadDashboardData();
+
+if (!isAdmin) {
+  window.location.replace("invoice.html");
+} else {
+  loadDashboardData();
+}
 
 async function loadDashboardData() {
   try {

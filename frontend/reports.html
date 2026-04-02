@@ -162,6 +162,12 @@
 <script src="script.js"></script>
 
 <script>
+const userStr = localStorage.getItem('user');
+const currentUser = userStr ? JSON.parse(userStr) : null;
+if (!currentUser || currentUser.role !== 'Admin') {
+  window.location.replace("invoice.html");
+}
+
 let invoices = [];
 let products = [];
 let customers = [];
