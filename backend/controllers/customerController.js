@@ -1,6 +1,7 @@
 const Customer = require('../models/Customer');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const { Parser } = require('json2csv');
 
 // @desc    Get all customers
 // @route   GET /api/customers
@@ -45,4 +46,28 @@ const deleteCustomer = catchAsync(async (req, res, next) => {
   res.json({ message: 'Customer removed' });
 });
 
-module.exports = { getCustomers, createCustomer, updateCustomer, deleteCustomer };
+const exportCustomersCSV = catchAsync(async (req, res, next) => {
+  const customers = await Customer.find({}).sort({ createdAt: -1 });
+  
+  if (!customers || customers.length === 0) {
+    return next(new AppError('No customers available for export', 404));
+  }
+
+  const exportData = customers.map(c => ({
+    'Customer Name': c.name,
+    'Email': c.email || 'N/A',
+    'Phone': c.phone || 'N/A',
+    'Company': c.company || 'N/A',
+    'Outstanding Balance': c.balance || 0,
+    'Registration Date': new Date(c.createdAt).toLocaleDateString()
+  }));
+
+  const parser = new Parser();
+  const csvFormat = parser.parse(exportData);
+
+  res.header('Content-Type', 'text/csv');
+  res.attachment('customers_export.csv');
+  return res.send(csvFormat);
+});
+
+module.exports = { getCustomers, createCustomer, updateCustomer, deleteCustomer, exportCustomersCSV };

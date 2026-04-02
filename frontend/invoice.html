@@ -37,9 +37,18 @@
           <p class="text-muted mb-0">View and manage customer billing</p>
         </div>
         <div>
-          <button class="btn btn-outline-success me-2" id="exportCsvBtn" title="Export ready for Google Sheets">
-            <i class="bi bi-filetype-csv me-1"></i> Export CSV
-          </button>
+          <div class="btn-group me-2">
+            <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
+              <i class="bi bi-filetype-csv me-1"></i> Export
+            </button>
+            <ul class="dropdown-menu">
+              <li><a class="dropdown-item exportCsvBtn" href="#" data-query="">Export All</a></li>
+              <li><a class="dropdown-item exportCsvBtn" href="#" data-query="?filter=today">Export Today</a></li>
+              <li><hr class="dropdown-divider"></li>
+              <li><a class="dropdown-item exportCsvBtn" href="#" data-query="?status=Paid">Export Paid</a></li>
+              <li><a class="dropdown-item exportCsvBtn" href="#" data-query="?status=Pending">Export Pending/Overdue</a></li>
+            </ul>
+          </div>
           <a href="createinvoice.html" class="btn btn-primary">
             <i class="bi bi-plus-lg me-1"></i> Create Invoice
           </a>
@@ -142,42 +151,42 @@ document.getElementById("searchInput").addEventListener("input", function() {
   });
 });
 
-document.getElementById("exportCsvBtn").addEventListener("click", async function() {
-  try {
-    const btn = this;
-    const oldHtml = btn.innerHTML;
-    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...`;
-    btn.disabled = true;
+document.querySelectorAll(".exportCsvBtn").forEach(btn => {
+  btn.addEventListener("click", async function(e) {
+    e.preventDefault();
+    try {
+      const q = this.dataset.query || "";
+      const originalText = this.innerHTML;
+      this.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...`;
 
-    const res = await fetch(`${API_URL}/invoices/export/csv`, {
-      method: 'GET',
-      headers: getAuthHeaders()
-    });
+      const res = await fetch(`${API_URL}/invoices/export/csv${q}`, {
+        method: 'GET',
+        headers: getAuthHeaders()
+      });
 
-    if (!res.ok) {
-        let errMsg = "Export failed.";
-        try { const errData = await res.json(); errMsg = errData.message; } catch(e) {}
-        throw new Error(errMsg);
+      if (!res.ok) {
+          let errMsg = "Export failed.";
+          try { const errData = await res.json(); errMsg = errData.message; } catch(e) {}
+          throw new Error(errMsg);
+      }
+
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.style.display = 'none';
+      a.href = url;
+      a.download = `POS_Invoices_Export${q.replace('?','_').replace('=','_')}_${new Date().toISOString().split('T')[0]}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      
+      this.innerHTML = originalText;
+
+    } catch (err) {
+        alert("CSV Export Error: " + err.message);
+        this.innerHTML = "Export Failed";
     }
-
-    const blob = await res.blob();
-    const url = window.URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.style.display = 'none';
-    a.href = url;
-    a.download = `POS_Invoices_Export_${new Date().toISOString().split('T')[0]}.csv`;
-    document.body.appendChild(a);
-    a.click();
-    window.URL.revokeObjectURL(url);
-    
-    btn.innerHTML = oldHtml;
-    btn.disabled = false;
-
-  } catch (err) {
-      alert("CSV Export Error: " + err.message);
-      this.innerHTML = `<i class="bi bi-filetype-csv me-1"></i> Export CSV`;
-      this.disabled = false;
-  }
+  });
 });
 
 fetchInvoices();

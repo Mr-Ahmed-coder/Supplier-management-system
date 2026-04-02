@@ -36,9 +36,14 @@
           <h3 class="fw-bold mb-1">Customers</h3>
           <p class="text-muted mb-0">Manage your customer database</p>
         </div>
-        <button class="btn btn-primary admin-only" data-bs-toggle="modal" data-bs-target="#customerModal">
-          <i class="bi bi-plus-lg me-1"></i> Add Customer
-        </button>
+        <div>
+          <button class="btn btn-outline-success me-2 admin-only" id="exportCsvBtn" title="Export ready for Google Sheets">
+            <i class="bi bi-filetype-csv me-1"></i> Export CSV
+          </button>
+          <button class="btn btn-primary admin-only" data-bs-toggle="modal" data-bs-target="#customerModal">
+            <i class="bi bi-plus-lg me-1"></i> Add Customer
+          </button>
+        </div>
       </div>
 
       <!-- Summary Cards -->
@@ -373,6 +378,44 @@ function clearForm() {
   document.getElementById("custCompany").value = "";
   document.getElementById("custBalance").value = "0";
 }
+
+document.getElementById("exportCsvBtn").addEventListener("click", async function() {
+  try {
+    const btn = this;
+    const oldHtml = btn.innerHTML;
+    btn.innerHTML = `<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Generating...`;
+    btn.disabled = true;
+
+    const res = await fetch(`${API_URL}/customers/export/csv`, {
+      method: 'GET',
+      headers: getAuthHeaders()
+    });
+
+    if (!res.ok) {
+        let errMsg = "Export failed.";
+        try { const errData = await res.json(); errMsg = errData.message; } catch(e) {}
+        throw new Error(errMsg);
+    }
+
+    const blob = await res.blob();
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.style.display = 'none';
+    a.href = url;
+    a.download = `POS_Customers_Export_${new Date().toISOString().split('T')[0]}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    btn.innerHTML = oldHtml;
+    btn.disabled = false;
+
+  } catch (err) {
+      alert("CSV Export Error: " + err.message);
+      this.innerHTML = `<i class="bi bi-filetype-csv me-1"></i> Export CSV`;
+      this.disabled = false;
+  }
+});
 
 fetchCustomers();
 </script>

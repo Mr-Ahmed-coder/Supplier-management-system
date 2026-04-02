@@ -177,9 +177,23 @@ const deleteInvoice = catchAsync(async (req, res, next) => {
   res.json({ message: 'Invoice removed' });
 });
 
-// CSV Engine for Google Sheets Imports
 const exportInvoicesCSV = catchAsync(async (req, res, next) => {
-  const invoices = await Invoice.find({})
+  const { filter, status } = req.query;
+  let queryObj = {};
+
+  if (filter === 'today') {
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
+    queryObj.createdAt = { $gte: startOfDay };
+  }
+
+  if (status === 'Paid') {
+    queryObj.status = 'Paid';
+  } else if (status === 'Pending') {
+    queryObj.status = { $in: ['Pending', 'Overdue', 'Unpaid'] };
+  }
+
+  const invoices = await Invoice.find(queryObj)
     .populate('customer', 'name email')
     .sort({ createdAt: -1 });
 

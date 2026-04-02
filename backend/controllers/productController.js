@@ -1,6 +1,7 @@
 const Product = require('../models/Product');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
+const { Parser } = require('json2csv');
 
 const getProducts = catchAsync(async (req, res, next) => {
   const products = await Product.find({}).populate('supplier', 'name');
@@ -43,4 +44,27 @@ const deleteProduct = catchAsync(async (req, res, next) => {
   res.json({ message: 'Product removed' });
 });
 
-module.exports = { getProducts, createProduct, updateProduct, deleteProduct };
+const exportProductsCSV = catchAsync(async (req, res, next) => {
+  const products = await Product.find({}).sort({ createdAt: -1 });
+  
+  if (!products || products.length === 0) {
+    return next(new AppError('No products available for export', 404));
+  }
+
+  const exportData = products.map(p => ({
+    'Item Name': p.name,
+    'Category': p.category || 'N/A',
+    'Price (UGX)': p.price,
+    'Stock Remaining': p.stock,
+    'Last Updated': new Date(p.updatedAt).toLocaleDateString()
+  }));
+
+  const parser = new Parser();
+  const csvFormat = parser.parse(exportData);
+
+  res.header('Content-Type', 'text/csv');
+  res.attachment('products_export.csv');
+  return res.send(csvFormat);
+});
+
+module.exports = { getProducts, createProduct, updateProduct, deleteProduct, exportProductsCSV };
