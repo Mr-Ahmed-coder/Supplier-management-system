@@ -195,7 +195,7 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
   }
 
   const invoices = await Invoice.find(queryObj)
-    .populate('customer', 'name email')
+    .populate('customer', 'name email phone')
     .sort({ createdAt: -1 });
 
   if (!invoices || invoices.length === 0) {
@@ -214,6 +214,8 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
     return {
       'Invoice Number': inv.number,
       'Customer Name': inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'),
+      'Customer Phone': inv.customerPhone || (inv.customer ? inv.customer.phone : 'Not provided'),
+      'Invoice Location': inv.location || 'Not provided',
       'Total Amount': totalAmount,
       'Amount Paid': amountPaid,
       'Balance': balance,
@@ -222,7 +224,7 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
     };
   });
 
-  const fields = ['Invoice Number', 'Customer Name', 'Total Amount', 'Amount Paid', 'Balance', 'Status', 'Date ISSUED'];
+  const fields = ['Invoice Number', 'Customer Name', 'Customer Phone', 'Invoice Location', 'Total Amount', 'Amount Paid', 'Balance', 'Status', 'Date ISSUED'];
   const json2csvParser = new Parser({ fields });
   const csvFormat = json2csvParser.parse(exportData);
 
