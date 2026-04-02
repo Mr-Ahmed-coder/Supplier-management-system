@@ -5,6 +5,7 @@ const invoiceSchema = new mongoose.Schema({
   customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
   customerName: { type: String }, // To hold historical name easily without full populate sometimes
   customerPhone: { type: String }, // To hold historical phone connection safely
+  location: { type: String }, // To capture delivery / logical billing geography
   items: [{
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
     productName: { type: String },

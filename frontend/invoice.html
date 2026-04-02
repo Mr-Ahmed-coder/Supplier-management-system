@@ -127,7 +127,10 @@ function renderInvoices() {
     table.innerHTML += `
       <tr>
         <td class="fw-semibold text-dark">${inv.number}</td>
-        <td>${inv.customerName || (inv.customer ? inv.customer.name : 'Unknown')}</td>
+        <td>
+          ${inv.customerName || (inv.customer ? inv.customer.name : 'Unknown')}
+          ${inv.location ? `<br><small class="text-muted"><i class="bi bi-geo-alt"></i> ${inv.location}</small>` : ''}
+        </td>
         <td>${inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString()}</td>
         <td class="fw-bold">UGX ${Number(totalAmount).toLocaleString('en-US')}</td>
         <td class="text-success text-opacity-75 fw-bold">UGX ${Number(amountPaid).toLocaleString('en-US')}</td>

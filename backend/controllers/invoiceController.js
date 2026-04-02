@@ -18,7 +18,7 @@ const createInvoice = catchAsync(async (req, res, next) => {
   session.startTransaction();
 
   try {
-    let { number, customer, customerName, customerPhone, date, dueDate, items, amountPaid } = req.body;
+    let { number, customer, customerName, customerPhone, location, date, dueDate, items, amountPaid } = req.body;
     
     if (!number || !items || !Array.isArray(items) || items.length === 0) {
       throw new AppError('Invoice number and at least one cart item are required', 400);
@@ -85,6 +85,7 @@ const createInvoice = catchAsync(async (req, res, next) => {
       customer, 
       customerName, 
       customerPhone,
+      location,
       date, 
       dueDate,
       items: validatedItems,

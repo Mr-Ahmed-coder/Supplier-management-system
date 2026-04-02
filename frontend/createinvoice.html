@@ -61,6 +61,10 @@
                     <input type="tel" class="form-control" id="customerPhone" placeholder="e.g. +256 700 000000">
                   </div>
                   <div class="col-md-4">
+                     <label class="form-label">Customer Location (Optional)</label>
+                     <input type="text" class="form-control" id="customerLocation" placeholder="e.g. Kampala, Uganda">
+                  </div>
+                  <div class="col-md-4">
                     <label class="form-label">Date Issued</label>
                     <input type="date" class="form-control" id="invoiceDate" required>
                   </div>
@@ -218,6 +222,7 @@
               }
               document.getElementById("customerName").value = inv.customerName || (inv.customer ? inv.customer.name : '');
               document.getElementById("customerPhone").value = inv.customerPhone || (inv.customer ? inv.customer.phone : '');
+              document.getElementById("customerLocation").value = inv.location || '';
               document.getElementById("invoiceDate").value = dateVal;
               
               if (inv.amountPaid !== undefined) {
@@ -340,6 +345,7 @@
       document.getElementById("saveInvoice").addEventListener("click", async function () {
         const name = document.getElementById("customerName").value.trim();
         const phone = document.getElementById("customerPhone").value.trim();
+        const location = document.getElementById("customerLocation").value.trim();
         const date = document.getElementById("invoiceDate").value;
         const amountPaid = document.getElementById("amountPaid").value;
 
@@ -373,6 +379,7 @@
           customer: customerId,
           customerName: name,
           customerPhone: phone,
+          location,
           date, 
           amountPaid,
           items: formattedItems

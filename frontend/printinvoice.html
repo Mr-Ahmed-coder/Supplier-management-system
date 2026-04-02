@@ -132,7 +132,8 @@
 
         // Customer
         const custName = inv.customerName || (inv.customer ? inv.customer.name : 'Unknown');
-        document.getElementById('customerName').textContent = custName;
+        const custLocation = inv.location ? `<br><small style="font-weight:normal; font-size:0.9em; color:#555;">Location: ${inv.location}</small>` : '';
+        document.getElementById('customerName').innerHTML = `${custName}${custLocation}`;
 
         // Items table — loop through cart items
         const tbody = document.getElementById('itemsBody');
