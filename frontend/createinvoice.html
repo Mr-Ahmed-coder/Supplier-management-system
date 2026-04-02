@@ -51,12 +51,16 @@
                 <h5 class="card-title border-bottom pb-3 mb-4">Invoice Information</h5>
 
                 <div class="row g-4 mb-4">
-                  <div class="col-md-6">
+                  <div class="col-md-4">
                     <label class="form-label">Customer Name</label>
                     <input type="text" class="form-control" id="customerName" required maxlength="100"
                       placeholder="e.g. Acme Corp">
                   </div>
-                  <div class="col-md-6">
+                  <div class="col-md-4">
+                    <label class="form-label">Phone Number (Optional)</label>
+                    <input type="tel" class="form-control" id="customerPhone" placeholder="e.g. +256 700 000000">
+                  </div>
+                  <div class="col-md-4">
                     <label class="form-label">Date Issued</label>
                     <input type="date" class="form-control" id="invoiceDate" required>
                   </div>
@@ -213,6 +217,7 @@
                 if (!isNaN(d)) dateVal = d.toISOString().split('T')[0];
               }
               document.getElementById("customerName").value = inv.customerName || (inv.customer ? inv.customer.name : '');
+              document.getElementById("customerPhone").value = inv.customerPhone || (inv.customer ? inv.customer.phone : '');
               document.getElementById("invoiceDate").value = dateVal;
               
               if (inv.amountPaid !== undefined) {
@@ -334,10 +339,11 @@
 
       document.getElementById("saveInvoice").addEventListener("click", async function () {
         const name = document.getElementById("customerName").value.trim();
+        const phone = document.getElementById("customerPhone").value.trim();
         const date = document.getElementById("invoiceDate").value;
         const amountPaid = document.getElementById("amountPaid").value;
 
-        if (!name || !date) return alert("Please fill all invoice details.");
+        if (!name || !date) return alert("Please fill all required invoice details.");
         if (cartItems.length === 0) return alert("Please add at least one item to the cart before saving.");
 
         const formattedItems = cartItems.map(item => ({
@@ -366,6 +372,7 @@
           number: invoiceNumber,
           customer: customerId,
           customerName: name,
+          customerPhone: phone,
           date, 
           amountPaid,
           items: formattedItems

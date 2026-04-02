@@ -107,6 +107,9 @@ function renderInvoices() {
     const amountPaid = inv.amountPaid !== undefined ? inv.amountPaid : (inv.status === 'Paid' ? totalAmount : 0);
     const balance = inv.balance !== undefined ? inv.balance : (inv.status === 'Paid' ? 0 : totalAmount);
 
+    const phone = inv.customerPhone || (inv.customer ? inv.customer.phone : '');
+    const callHtml = phone ? `<a href="tel:${phone}" class="btn btn-sm btn-outline-info me-1" title="Call Customer (${phone})"><i class="bi bi-telephone-fill"></i></a>` : '';
+
     let badgeClass = "badge-status text-white ";
     if (inv.status === "Paid") badgeClass += "bg-success";
     else if (inv.status === "Partial") badgeClass += "bg-warning text-dark";
@@ -122,6 +125,7 @@ function renderInvoices() {
         <td class="text-danger fw-bold">UGX ${Number(balance).toLocaleString('en-US')}</td>
         <td><span class="badge ${badgeClass}">${inv.status}</span></td>
         <td>
+          ${callHtml}
           <button class="btn btn-sm btn-outline-primary me-1" onclick="window.location.href='createinvoice.html?id=${inv._id}'" title="View / Edit / Pay"><i class="bi bi-pencil-square"></i></button>
           <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='printinvoice.html?id=${inv._id}'" title="Print Output"><i class="bi bi-printer"></i></button>
         </td>

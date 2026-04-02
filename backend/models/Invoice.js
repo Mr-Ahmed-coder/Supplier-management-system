@@ -4,6 +4,7 @@ const invoiceSchema = new mongoose.Schema({
   number: { type: String, required: true, unique: true },
   customer: { type: mongoose.Schema.Types.ObjectId, ref: 'Customer' },
   customerName: { type: String }, // To hold historical name easily without full populate sometimes
+  customerPhone: { type: String }, // To hold historical phone connection safely
   items: [{
     product: { type: mongoose.Schema.Types.ObjectId, ref: 'Product' },
     productName: { type: String },

@@ -18,7 +18,7 @@ const createInvoice = catchAsync(async (req, res, next) => {
   session.startTransaction();
 
   try {
-    let { number, customer, customerName, date, dueDate, items, amountPaid } = req.body;
+    let { number, customer, customerName, customerPhone, date, dueDate, items, amountPaid } = req.body;
     
     if (!number || !items || !Array.isArray(items) || items.length === 0) {
       throw new AppError('Invoice number and at least one cart item are required', 400);
@@ -56,7 +56,7 @@ const createInvoice = catchAsync(async (req, res, next) => {
     if (!customer && customerName) {
       let existingCustomer = await Customer.findOne({ name: customerName }).session(session);
       if (!existingCustomer) {
-        let newCustomer = new Customer({ name: customerName, balance: 0 });
+        let newCustomer = new Customer({ name: customerName, phone: customerPhone, balance: 0 });
         existingCustomer = await newCustomer.save({ session });
       }
       customer = existingCustomer._id;
@@ -84,6 +84,7 @@ const createInvoice = catchAsync(async (req, res, next) => {
       number, 
       customer, 
       customerName, 
+      customerPhone,
       date, 
       dueDate,
       items: validatedItems,
