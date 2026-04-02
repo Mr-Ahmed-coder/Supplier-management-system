@@ -4,7 +4,7 @@ const { getProducts, createProduct, updateProduct, deleteProduct, exportProducts
 const { protect, adminOnly } = require('../middleware/auth');
 
 router.route('/export/csv').get(protect, adminOnly, exportProductsCSV);
-router.route('/').get(protect, adminOnly, getProducts).post(protect, adminOnly, createProduct);
+router.route('/').get(protect, getProducts).post(protect, adminOnly, createProduct);
 router.route('/:id').put(protect, adminOnly, updateProduct).delete(protect, adminOnly, deleteProduct);
 
 module.exports = router;
