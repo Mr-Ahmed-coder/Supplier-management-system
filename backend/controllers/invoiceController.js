@@ -4,7 +4,7 @@ const Product = require('../models/Product');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const { Parser } = require('json2csv');
-const xlsx = require('xlsx');
+const xlsx = require('xlsx-js-style');
 
 const getInvoices = catchAsync(async (req, res, next) => {
   const invoices = await Invoice.find({})
@@ -239,6 +239,50 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
     { wch: 20 }, // Customer Phone
     { wch: 25 }  // Invoice Location
   ];
+
+  // Apply visual styling (Borders, Headers, Alignments)
+  const range = xlsx.utils.decode_range(ws['!ref']);
+  for (let R = range.s.r; R <= range.e.r; ++R) {
+    for (let C = range.s.c; C <= range.e.c; ++C) {
+      const cellAddress = xlsx.utils.encode_cell({ r: R, c: C });
+      const cell = ws[cellAddress];
+      if (!cell) continue;
+
+      const border = {
+        top: { style: "thin", color: { rgb: "E2E8F0" } },
+        bottom: { style: "thin", color: { rgb: "E2E8F0" } },
+        left: { style: "thin", color: { rgb: "E2E8F0" } },
+        right: { style: "thin", color: { rgb: "E2E8F0" } }
+      };
+
+      if (R === 0) {
+        // Header Row Styling
+        cell.s = {
+          font: { bold: true, color: { rgb: "FFFFFF" } },
+          fill: { fgColor: { rgb: "1E293B" } }, // Dark gray/blue professional header
+          alignment: { horizontal: "center", vertical: "center" },
+          border
+        };
+      } else {
+        // Data Rows Styling
+        let alignment = { vertical: "center" };
+        if (typeof cell.v === "number") {
+          alignment.horizontal = "right";
+        } else if (typeof cell.v === "string" && cell.v.match(/^\d{4}-\d{2}-\d{2}$/)) {
+          alignment.horizontal = "center";
+        } else {
+          alignment.horizontal = "left";
+        }
+
+        cell.s = {
+          font: { color: { rgb: "333333" } },
+          alignment,
+          border,
+          fill: (R % 2 === 0) ? { fgColor: { rgb: "F8FAFC" } } : { fgColor: { rgb: "FFFFFF" } } // Alternating rows
+        };
+      }
+    }
+  }
 
   const wb = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(wb, ws, "Invoices");
