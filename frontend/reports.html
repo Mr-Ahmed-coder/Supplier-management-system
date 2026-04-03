@@ -198,9 +198,13 @@ function loadSummary() {
   let overdueAmount = 0;
 
   invoices.forEach(inv => {
-    const amount = parseFloat(inv.amount) || 0;
-    totalRevenue += amount;
-    if (inv.status === "Overdue") overdueAmount += amount;
+    const amountPaid = parseFloat(inv.amountPaid !== undefined ? inv.amountPaid : (inv.status === "Paid" ? (inv.totalAmount || inv.amount) : 0)) || 0;
+    const balance = parseFloat(inv.balance) || 0;
+    const totalAmount = parseFloat(inv.totalAmount !== undefined ? inv.totalAmount : inv.amount) || 0;
+
+    totalRevenue += amountPaid;
+    
+    if (inv.status === "Overdue") overdueAmount += balance > 0 ? balance : totalAmount;
   });
 
   document.getElementById("reportRevenue").innerText = `UGX ${Number(totalRevenue).toLocaleString('en-US')}`;
@@ -298,7 +302,8 @@ function renderRevenueChart() {
   invoices.forEach(inv => {
     const date = inv.date || new Date(inv.createdAt).toLocaleDateString("en-CA");
     if(!dateMap[date]) dateMap[date] = 0;
-    dateMap[date] += (parseFloat(inv.amount) || 0);
+    const amountPaid = parseFloat(inv.amountPaid !== undefined ? inv.amountPaid : (inv.status === "Paid" ? (inv.totalAmount || inv.amount) : 0)) || 0;
+    dateMap[date] += amountPaid;
   });
 
   const sortedDates = Object.keys(dateMap).sort();
@@ -366,7 +371,8 @@ function renderTopCustomers() {
   invoices.forEach(inv => {
     const name = inv.customerName || (inv.customer ? inv.customer.name : 'Unknown');
     if (!custMap[name]) custMap[name] = { total: 0, count: 0 };
-    custMap[name].total += parseFloat(inv.amount) || 0;
+    const totalAmt = parseFloat(inv.totalAmount !== undefined ? inv.totalAmount : inv.amount) || 0;
+    custMap[name].total += totalAmt;
     custMap[name].count++;
   });
 

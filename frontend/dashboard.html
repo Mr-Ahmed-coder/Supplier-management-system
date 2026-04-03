@@ -199,11 +199,12 @@ async function loadDashboardData() {
         const badgeClass =
           displayStatus === "Paid" ? "status-paid" :
             displayStatus === "Partial" ? "status-pending" : "status-overdue";
+        const totalAmount = inv.totalAmount !== undefined ? inv.totalAmount : inv.amount;
         tbody.innerHTML += `
       <tr>
         <td>${escapeHTML(inv.date ? new Date(inv.date).toLocaleDateString() : new Date(inv.createdAt).toLocaleDateString())}</td>
         <td class="fw-semibold text-dark">${escapeHTML(inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'))}</td>
-        <td class="fw-bold text-primary">UGX ${escapeHTML(Number(inv.amount).toLocaleString('en-US'))}</td>
+        <td class="fw-bold text-primary">UGX ${escapeHTML(Number(totalAmount).toLocaleString('en-US'))}</td>
         <td><span class="badge-status ${escapeHTML(badgeClass)}">${escapeHTML(displayStatus)}</span></td>
       </tr>
     `;

@@ -40,7 +40,7 @@
           <button class="btn btn-outline-success me-2 admin-only" id="exportCsvBtn" title="Export ready for Google Sheets">
             <i class="bi bi-filetype-csv me-1"></i> Export CSV
           </button>
-          <button class="btn btn-primary admin-only" data-bs-toggle="modal" data-bs-target="#customerModal">
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#customerModal">
             <i class="bi bi-plus-lg me-1"></i> Add Customer
           </button>
         </div>
@@ -334,7 +334,7 @@ async function viewCustomer(id) {
       document.getElementById("viewCustomerInvoices").innerHTML = custInvoices.map(inv => {
         const displayStatus = (inv.status === "Pending" || inv.status === "Unpaid") ? "Partial" : inv.status;
         const badgeClass = displayStatus === "Paid" ? "status-paid" : displayStatus === "Partial" ? "status-pending" : "status-overdue";
-        return `<tr><td class="py-2">${inv.number}</td><td class="py-2 fw-semibold">UGX ${Number(inv.amount).toLocaleString('en-US')}</td><td class="py-2"><span class="badge-status ${badgeClass}">${displayStatus}</span></td></tr>`;
+        return `<tr><td class="py-2">${inv.number}</td><td class="py-2 fw-semibold">UGX ${Number(inv.totalAmount !== undefined ? inv.totalAmount : inv.amount).toLocaleString('en-US')}</td><td class="py-2"><span class="badge-status ${badgeClass}">${displayStatus}</span></td></tr>`;
       }).join("");
     } else {
       document.getElementById("viewCustomerInvoices").innerHTML = `<tr><td colspan="3" class="text-center text-muted py-3">No invoices found for this customer.</td></tr>`;
