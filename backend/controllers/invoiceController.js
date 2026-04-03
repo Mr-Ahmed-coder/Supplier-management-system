@@ -204,27 +204,42 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
     const balance = inv.balance !== undefined ? inv.balance : Math.max(0, totalAmount - amountPaid);
     
     let dateStr = 'Unknown';
-    if (inv.date) dateStr = new Date(inv.date).toLocaleDateString();
-    else if (inv.createdAt) dateStr = new Date(inv.createdAt).toLocaleDateString();
+    if (inv.date) dateStr = new Date(inv.date).toISOString().split('T')[0];
+    else if (inv.createdAt) dateStr = new Date(inv.createdAt).toISOString().split('T')[0];
 
-    let expectedStr = 'Not provided';
-    if (inv.dueDate) expectedStr = new Date(inv.dueDate).toLocaleDateString();
+    let expectedStr = 'N/A';
+    if (inv.dueDate) expectedStr = new Date(inv.dueDate).toISOString().split('T')[0];
 
     return {
       'Invoice Number': inv.number,
       'Customer Name': inv.customerName || (inv.customer ? inv.customer.name : 'Unknown'),
-      'Customer Phone': inv.customerPhone || (inv.customer ? inv.customer.phone : 'Not provided'),
-      'Invoice Location': inv.location || 'Not provided',
-      'Total Amount': totalAmount,
-      'Amount Paid': amountPaid,
-      'Balance': balance,
+      'Total Amount': Number(totalAmount),
+      'Amount Paid': Number(amountPaid),
+      'Balance': Number(balance),
       'Status': inv.status,
-      'Date ISSUED': dateStr,
-      'Expected Date': expectedStr
+      'Expected Payment Date': expectedStr,
+      'Date Issued': dateStr,
+      'Customer Phone': inv.customerPhone || (inv.customer ? inv.customer.phone : 'N/A'),
+      'Invoice Location': inv.location || 'N/A'
     };
   });
 
   const ws = xlsx.utils.json_to_sheet(exportData);
+
+  // Set professional column widths to prevent cutoffs and adjust visual spacing scaling
+  ws['!cols'] = [
+    { wch: 20 }, // Invoice Number
+    { wch: 35 }, // Customer Name
+    { wch: 18 }, // Total Amount
+    { wch: 18 }, // Amount Paid
+    { wch: 18 }, // Balance
+    { wch: 15 }, // Status
+    { wch: 25 }, // Expected Payment Date
+    { wch: 15 }, // Date Issued
+    { wch: 20 }, // Customer Phone
+    { wch: 25 }  // Invoice Location
+  ];
+
   const wb = xlsx.utils.book_new();
   xlsx.utils.book_append_sheet(wb, ws, "Invoices");
 
