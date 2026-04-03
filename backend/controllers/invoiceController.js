@@ -4,6 +4,7 @@ const Product = require('../models/Product');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/AppError');
 const { Parser } = require('json2csv');
+const xlsx = require('xlsx');
 
 const getInvoices = catchAsync(async (req, res, next) => {
   const invoices = await Invoice.find({})
@@ -223,13 +224,16 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
     };
   });
 
-  const fields = ['Invoice Number', 'Customer Name', 'Customer Phone', 'Invoice Location', 'Total Amount', 'Amount Paid', 'Balance', 'Status', 'Date ISSUED', 'Expected Date'];
-  const json2csvParser = new Parser({ fields });
-  const csvFormat = json2csvParser.parse(exportData);
+  const ws = xlsx.utils.json_to_sheet(exportData);
+  const wb = xlsx.utils.book_new();
+  xlsx.utils.book_append_sheet(wb, ws, "Invoices");
 
-  res.header('Content-Type', 'text/csv');
-  res.attachment('invoices_export.csv');
-  return res.send(csvFormat);
+  const excelBuffer = xlsx.write(wb, { type: 'buffer', bookType: 'xlsx' });
+
+  res.header('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+  const filename = `Invoices_Export.xlsx`;
+  res.setHeader('Content-Disposition', `attachment; filename="${filename}"`);
+  return res.send(excelBuffer);
 });
 
 // Advanced Feature Stub: Direct Google Sheets Server-To-Server Synchronization

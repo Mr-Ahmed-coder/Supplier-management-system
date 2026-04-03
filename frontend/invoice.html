@@ -39,7 +39,7 @@
         <div>
           <div class="btn-group me-2">
             <button type="button" class="btn btn-outline-success dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false">
-              <i class="bi bi-filetype-csv me-1"></i> Export
+              <i class="bi bi-file-earmark-excel me-1"></i> Export
             </button>
             <ul class="dropdown-menu">
               <li><a class="dropdown-item exportCsvBtn" href="#" data-query="">Export All</a></li>
@@ -186,7 +186,7 @@ document.querySelectorAll(".exportCsvBtn").forEach(btn => {
       const a = document.createElement('a');
       a.style.display = 'none';
       a.href = url;
-      a.download = `POS_Invoices_Export${q.replace('?','_').replace('=','_')}_${new Date().toISOString().split('T')[0]}.csv`;
+      a.download = `POS_Invoices_Export${q.replace('?','_').replace('=','_')}_${new Date().toISOString().split('T')[0]}.xlsx`;
       document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
