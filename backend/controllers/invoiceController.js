@@ -220,7 +220,7 @@ const exportInvoicesCSV = catchAsync(async (req, res, next) => {
       'Expected Payment Date': expectedStr,
       'Date Issued': dateStr,
       'Customer Phone': inv.customerPhone || (inv.customer ? inv.customer.phone : 'N/A'),
-      'Invoice Location': inv.location || 'N/A'
+      'Location': inv.location || 'N/A'
     };
   });
 
