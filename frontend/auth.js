@@ -6,6 +6,22 @@ if (window.location.hostname === '127.0.0.1' || window.location.hostname === 'lo
     }
 }
 
+// Global fetch interceptor for expired sessions (401 Unauthorized)
+const originalFetch = window.fetch;
+window.fetch = async function () {
+    const response = await originalFetch.apply(this, arguments);
+    if (response.status === 401) {
+        const url = arguments[0];
+        if (typeof url === 'string' && !url.includes('/login') && !url.includes('/register')) {
+            alert('Session expired. Please log in again.');
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = 'login.html';
+        }
+    }
+    return response;
+};
+
 function checkAuth() {
   const token = localStorage.getItem('token');
   if (!token) {
