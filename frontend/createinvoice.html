@@ -43,123 +43,116 @@
           </a>
         </div>
 
-        <div class="row">
-          <!-- Editor Card -->
-          <div class="col-lg-8">
-            <div class="card shadow-sm border-0">
-              <div class="card-body p-4">
-                <h5 class="card-title border-bottom pb-3 mb-4">Invoice Information</h5>
-
-                <div class="row g-4 mb-4">
-                  <div class="col-md-4">
-                    <label class="form-label">Customer Name</label>
-                    <input type="text" class="form-control" id="customerName" required maxlength="100"
-                      placeholder="e.g. Acme Corp">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">Phone Number (Optional)</label>
-                    <input type="tel" class="form-control" id="customerPhone" placeholder="e.g. +256 700 000000">
-                  </div>
-                  <div class="col-md-4">
-                     <label class="form-label">Customer Location (Optional)</label>
-                     <input type="text" class="form-control" id="customerLocation" placeholder="e.g. Kampala, Uganda">
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">Date Issued</label>
-                    <input type="date" class="form-control" id="invoiceDate" required>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label text-muted fw-bold">Expected Payment Date (Optional)</label>
-                    <input type="date" class="form-control border-warning" id="invoiceDueDate">
-                  </div>
-
-                  <div class="col-md-4">
-                    <label class="form-label">Grand Total (UGX)</label>
-                    <div class="input-group">
-                      <span class="input-group-text bg-light text-primary fw-bold">UGX</span>
-                      <input type="text" class="form-control fw-bold text-primary" id="invoiceAmount" readonly value="0" data-raw-total="0">
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label fw-bold">Amount Paid</label>
-                    <div class="input-group">
-                      <span class="input-group-text bg-light">UGX</span>
-                      <input type="number" class="form-control" id="amountPaid" min="0" value="0">
-                    </div>
-                  </div>
-                  <div class="col-md-4">
-                    <label class="form-label">Remaining Balance</label>
-                    <div class="input-group">
-                      <span class="input-group-text bg-light text-danger fw-bold">UGX</span>
-                      <input type="text" class="form-control fw-bold text-danger bg-white" id="invoiceBalance" readonly value="0">
-                    </div>
+        <div class="row justify-content-center">
+          <div class="col-lg-11">
+            
+            <!-- Financial Summary Cards -->
+            <div class="row g-3 mb-4">
+              <div class="col-md-4">
+                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
+                  <span class="text-dark fw-bold mb-2 d-block">Grand Total (UGX)</span>
+                  <div class="d-flex align-items-center mt-1">
+                    <span class="fs-4 fw-bold text-primary me-2">UGX</span>
+                    <input type="text" class="form-control-plaintext fw-bold text-primary p-0 m-0 pointer-events-none" id="invoiceAmount" readonly value="0" data-raw-total="0" style="font-size: 1.5rem;">
                   </div>
                 </div>
-                
-                <!-- Items Cart Section -->
-                <h5 class="card-title border-bottom pb-3 mb-4 mt-5">Invoice Items</h5>
-                <div class="row g-3 align-items-end mb-4 bg-light p-3 rounded shadow-sm border">
-                  <div class="col-md-5">
-                    <label class="form-label fw-semibold text-secondary small">Select Cosmetic Item</label>
-                    <select class="form-select" id="itemProduct">
-                      <option value="">-- Choose Product --</option>
-                    </select>
-                  </div>
-                  <div class="col-md-2">
-                    <label class="form-label fw-semibold text-secondary small">Price</label>
-                    <input type="number" class="form-control bg-white" id="itemPrice" readonly placeholder="0">
-                  </div>
-                  <div class="col-md-3">
-                    <label class="form-label fw-semibold text-secondary small">Quantity</label>
-                    <input type="number" class="form-control" id="itemQuantity" min="1" placeholder="Qty">
-                  </div>
-                  <div class="col-md-2">
-                    <button class="btn btn-outline-primary w-100 fw-semibold" id="addToCartBtn"><i class="bi bi-cart-plus"></i> Add</button>
-                  </div>
-                </div>
-
-                <div class="table-responsive mb-4">
-                  <table class="table table-bordered table-hover align-middle">
-                    <thead class="table-light">
-                      <tr>
-                        <th>Item Description</th>
-                        <th>Unit Price</th>
-                        <th>Qty</th>
-                        <th>Subtotal</th>
-                        <th class="text-center">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody id="cartTableBody">
-                      <tr><td colspan="5" class="text-center text-muted">No items added yet.</td></tr>
-                    </tbody>
-                  </table>
-                </div>
-
-                <div class="d-flex justify-content-end border-top pt-4">
-                  <a href="#" class="btn btn-secondary me-2" id="printInvoiceBtn" style="display:none;"><i
-                      class="bi bi-printer me-1"></i>Download PDF</a>
-                  <button class="btn btn-danger me-2 admin-only" id="deleteInvoiceBtn" style="display:none;"><i
-                      class="bi bi-trash me-1"></i>Delete</button>
-                  <button class="btn btn-primary px-4 shadow-sm" id="saveInvoice">Save Invoice</button>
-                </div>
-
               </div>
-            </div>
-          </div>
-
-          <!-- Quick Summary Panel -->
-          <div class="col-lg-4">
-            <div class="card bg-light border-0 shadow-sm mt-4 mt-lg-0">
-              <div class="card-body">
-                <!-- <h6 class="fw-bold mb-3"><i class="bi bi-info-circle me-2"></i>Tips</h6>
-              <p class="text-muted small mb-2">Ensure the customer name matches exactly if you want it to link to their profile.</p>
-              <p class="text-muted small">Amounts cannot be negative. Updates will be reflected in reports instantly.</p>
-            </div> -->
+              <div class="col-md-4">
+                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
+                  <span class="text-dark fw-bold mb-2 d-block">Amount Paid</span>
+                  <div class="d-flex align-items-center mt-1">
+                    <span class="fs-4 fw-bold text-dark me-2">UGX</span>
+                    <input type="number" class="form-control p-0 m-0 border-0 fw-bold text-dark shadow-none bg-transparent" id="amountPaid" min="0" value="0" style="font-size: 1.5rem;">
+                  </div>
+                </div>
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
+                  <span class="text-dark fw-bold mb-2 d-block">Remaining Balance</span>
+                  <div class="d-flex align-items-center mt-1">
+                    <span class="fs-4 fw-bold text-danger me-2">UGX</span>
+                    <input type="text" class="form-control-plaintext fw-bold text-danger p-0 m-0 pointer-events-none" id="invoiceBalance" readonly value="0" style="font-size: 1.5rem;">
+                  </div>
+                </div>
               </div>
             </div>
 
-          </div>
+            <!-- Items Cart Section -->
+            <h5 class="fw-bold text-dark mb-3 mt-5">Invoice Items</h5>
+            <div class="card shadow-sm border-0 mb-4 p-4 rounded-3">
+              <div class="row g-3 align-items-end mb-4">
+                <div class="col-md-5">
+                  <label class="form-label fw-semibold text-secondary small">Select Cosmetic Item</label>
+                  <select class="form-select" id="itemProduct">
+                    <option value="">-- Choose Product --</option>
+                  </select>
+                </div>
+                <div class="col-md-2">
+                  <label class="form-label fw-semibold text-secondary small">Price</label>
+                  <input type="number" class="form-control bg-light" id="itemPrice" readonly placeholder="0">
+                </div>
+                <div class="col-md-3">
+                  <label class="form-label fw-semibold text-secondary small">Quantity</label>
+                  <input type="number" class="form-control" id="itemQuantity" min="1" placeholder="Qty">
+                </div>
+                <div class="col-md-2">
+                  <button class="btn btn-outline-primary w-100 fw-semibold" id="addToCartBtn"><i class="bi bi-cart-plus me-1"></i> Add</button>
+                </div>
+              </div>
 
+              <div class="table-responsive border rounded-3 bg-white">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="bg-light text-secondary text-uppercase small" style="font-size: 0.8rem; border-bottom: 2px solid #e2e8f0;">
+                    <tr>
+                      <th class="py-3 px-3">Item Description</th>
+                      <th class="py-3">Unit Price</th>
+                      <th class="py-3">Qty</th>
+                      <th class="py-3">Subtotal</th>
+                      <th class="text-center py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="cartTableBody">
+                    <tr><td colspan="5" class="text-center text-muted py-4">No items added yet.</td></tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- Invoice Information Section -->
+            <h5 class="fw-bold text-dark mb-3 mt-5">Invoice Information</h5>
+            <div class="card shadow-sm border-0 mb-5 p-4 rounded-3">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Customer Name</label>
+                  <input type="text" class="form-control bg-light border-0" id="customerName" required maxlength="100" placeholder="e.g. Acme Corp">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Phone Number (Optional)</label>
+                  <input type="tel" class="form-control bg-light border-0" id="customerPhone" placeholder="e.g. +256 700 000000">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Customer Location (Optional)</label>
+                  <input type="text" class="form-control bg-light border-0" id="customerLocation" placeholder="e.g. Kampala, Uganda">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Date Issued</label>
+                  <input type="date" class="form-control bg-light border-0" id="invoiceDate" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Expected Payment Date (Optional)</label>
+                  <input type="date" class="form-control bg-light border-0" id="invoiceDueDate">
+                </div>
+              </div>
+            </div>
+
+            <!-- Bottom Actions -->
+            <div class="d-flex justify-content-end align-items-center py-3 border-top mb-5">
+              <a href="#" class="btn btn-secondary px-4 me-2" id="printInvoiceBtn" style="display:none;"><i class="bi bi-printer me-1"></i>Download PDF</a>
+              <button class="btn btn-danger px-4 me-2 admin-only" id="deleteInvoiceBtn" style="display:none;"><i class="bi bi-trash me-1"></i>Delete</button>
+              <button class="btn btn-primary px-5 shadow fw-semibold" id="saveInvoice">Save Invoice</button>
+            </div>
+
+          </div>
         </div>
       </div>
     </div>
