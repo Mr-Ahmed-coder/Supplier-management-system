@@ -31,6 +31,19 @@
     
     <div class="container-fluid py-4 px-4">
       
+      <!-- Header / Filters -->
+      <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+           <h3 class="fw-bold mb-1" id="reportMainTitle">All-Time Business Analytics</h3>
+           <p class="text-muted mb-0">Overview of system performance</p>
+        </div>
+        <div class="d-flex align-items-center rounded bg-white px-3 py-2 shadow-sm border border-secondary border-opacity-25">
+           <label class="me-3 fw-bold text-muted small text-uppercase">Daily Filter:</label>
+           <input type="date" id="reportDateFilter" class="form-control form-control-sm border-0 bg-light" style="max-width: 150px; font-weight: 500;">
+           <button class="btn btn-sm btn-outline-danger ms-2 border-0" id="clearDateBtn" style="display:none;" title="Clear Filter"><i class="bi bi-x-circle-fill"></i></button>
+        </div>
+      </div>
+
       <!-- Summary Cards -->
       <div class="row g-4 mb-4">
         <div class="col-md-3">
@@ -172,10 +185,11 @@ let invoices = [];
 let products = [];
 let customers = [];
 
-async function fetchReportData() {
+async function fetchReportData(dateQuery = "") {
   try {
+    const invUrl = dateQuery ? `${API_URL}/invoices?date=${dateQuery}` : `${API_URL}/invoices`;
     const [invRes, prodRes, custRes] = await Promise.all([
-      fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() }),
+      fetch(invUrl, { headers: getAuthHeaders() }),
       fetch(`${API_URL}/products`, { headers: getAuthHeaders() }),
       fetch(`${API_URL}/customers`, { headers: getAuthHeaders() })
     ]);
@@ -416,6 +430,28 @@ function renderTopProducts() {
     `;
   });
 }
+
+document.getElementById("reportDateFilter").addEventListener("change", function() {
+  const dateVal = this.value;
+  const title = document.getElementById("reportMainTitle");
+  const clearBtn = document.getElementById("clearDateBtn");
+  if (dateVal) {
+    title.innerText = `Daily Analytics: ${dateVal}`;
+    clearBtn.style.display = 'inline-block';
+    fetchReportData(dateVal);
+  } else {
+    title.innerText = "All-Time Business Analytics";
+    clearBtn.style.display = 'none';
+    fetchReportData();
+  }
+});
+
+document.getElementById("clearDateBtn").addEventListener("click", function() {
+  document.getElementById("reportDateFilter").value = "";
+  document.getElementById("reportMainTitle").innerText = "All-Time Business Analytics";
+  this.style.display = 'none';
+  fetchReportData();
+});
 
 fetchReportData();
 </script>

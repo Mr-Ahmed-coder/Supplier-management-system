@@ -7,10 +7,27 @@ const { Parser } = require('json2csv');
 const xlsx = require('xlsx-js-style');
 
 const getInvoices = catchAsync(async (req, res, next) => {
-  const invoices = await Invoice.find({})
+  let queryObj = {};
+
+  if (req.query.date) {
+    const targetDate = new Date(req.query.date);
+    if (!isNaN(targetDate)) {
+      const startOfDay = new Date(targetDate);
+      startOfDay.setHours(0, 0, 0, 0);
+
+      const endOfDay = new Date(targetDate);
+      endOfDay.setHours(23, 59, 59, 999);
+
+      queryObj.createdAt = { $gte: startOfDay, $lte: endOfDay };
+    }
+  }
+
+  const invoices = await Invoice.find(queryObj)
     .populate('customer', 'name email')
     .populate('createdBy', 'username')
-    .populate('items.product', 'name category');
+    .populate('items.product', 'name category')
+    .sort({ createdAt: -1 });
+
   res.json(invoices);
 });
 
