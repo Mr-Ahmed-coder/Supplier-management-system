@@ -18,6 +18,7 @@ app.use('/api/products', require('./routes/productRoutes'));
 app.use('/api/invoices', require('./routes/invoiceRoutes'));
 app.use('/api/receipts', require('./routes/receiptRoutes'));
 app.use('/api/dashboard', require('./routes/dashboardRoutes'));
+app.use('/api/admin', require('./routes/adminRoutes'));
 
 // Serve Frontend Static Files
 app.use(express.static(path.join(__dirname, '../frontend')));
