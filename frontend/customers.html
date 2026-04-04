@@ -227,6 +227,23 @@ function renderCustomers() {
       <button class="btn btn-sm btn-outline-danger shadow-sm" onclick="deleteCustomer('${c._id}')" title="Delete"><i class="bi bi-trash"></i></button>
     ` : '';
 
+    let callHtml = `<button class="btn btn-sm btn-outline-secondary shadow-sm me-1" disabled><i class="bi bi-telephone"></i></button>`;
+    let waHtml = `<button class="btn btn-sm btn-outline-secondary shadow-sm me-1" disabled><i class="bi bi-whatsapp"></i></button>`;
+    
+    if (c.phone && c.phone.length > 5) {
+        const cleanPhone = c.phone.replace(/[^0-9]/g, '');
+        let msg = `Hello ${c.name}, `;
+        if (c.balance > 0) {
+            msg += `we are reaching out regarding your account balance of UGX ${Number(c.balance).toLocaleString('en-US')}. Please let us know if you have any questions!`;
+        } else {
+            msg += `we wanted to quickly reach out to you from Tumi cosmetics!`;
+        }
+        const waMsg = encodeURIComponent(msg);
+        
+        callHtml = `<a href="tel:${c.phone}" class="btn btn-sm btn-outline-warning shadow-sm me-1" title="Call"><i class="bi bi-telephone-fill"></i></a>`;
+        waHtml = `<a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-success shadow-sm me-1" title="WhatsApp"><i class="bi bi-whatsapp"></i></a>`;
+    }
+
     table.innerHTML += `
       <tr>
         <td class="fw-semibold text-dark">${c.name}</td>
@@ -237,6 +254,8 @@ function renderCustomers() {
         <td><span class="badge-status ${statusClass}">${statusText}</span></td>
         <td>
           <button class="btn btn-sm btn-outline-info shadow-sm me-1" onclick="viewCustomer('${c._id}')" title="View"><i class="bi bi-eye"></i></button>
+          ${waHtml}
+          ${callHtml}
           ${adminActions}
         </td>
       </tr>

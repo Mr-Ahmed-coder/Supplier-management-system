@@ -117,7 +117,16 @@ function renderInvoices() {
     const balance = inv.balance !== undefined ? inv.balance : (inv.status === 'Paid' ? 0 : totalAmount);
 
     const phone = inv.customerPhone || (inv.customer ? inv.customer.phone : '');
-    const callHtml = phone ? `<a href="tel:${phone}" class="btn btn-sm btn-outline-success me-1" title="Call Customer"><i class="bi bi-telephone-fill"></i> Call</a>` : '';
+    
+    let callHtml = `<button class="btn btn-sm btn-outline-secondary me-1" disabled title="No Phone Available"><i class="bi bi-telephone"></i></button>`;
+    let waHtml = `<button class="btn btn-sm btn-outline-secondary me-1" disabled title="No Phone Available"><i class="bi bi-whatsapp"></i></button>`;
+    
+    if (phone && phone.length > 5) {
+        const cleanPhone = phone.replace(/[^0-9]/g, '');
+        const waMsg = encodeURIComponent(`Hello, I'm reaching out regarding your invoice ${inv.number}. The current outstanding balance is UGX ${Number(balance).toLocaleString('en-US')}. Please let us know if you need any assistance!`);
+        callHtml = `<a href="tel:${phone}" class="btn btn-sm btn-outline-success me-1" title="Call Customer"><i class="bi bi-telephone-fill"></i></a>`;
+        waHtml = `<a href="https://wa.me/${cleanPhone}?text=${waMsg}" target="_blank" class="btn btn-sm btn-success me-1" title="WhatsApp Customer"><i class="bi bi-whatsapp"></i></a>`;
+    }
 
     const displayStatus = (inv.status === "Pending" || inv.status === "Unpaid") ? "Partial" : inv.status;
 
@@ -145,6 +154,7 @@ function renderInvoices() {
         <td class="text-danger fw-bold">UGX ${Number(balance).toLocaleString('en-US')}</td>
         <td><span class="badge ${badgeClass}">${displayStatus}</span></td>
         <td>
+          ${waHtml}
           ${callHtml}
           <button class="btn btn-sm btn-outline-primary me-1" onclick="window.location.href='createinvoice.html?id=${inv._id}'" title="View / Edit / Pay"><i class="bi bi-pencil-square"></i></button>
           <button class="btn btn-sm btn-outline-secondary" onclick="window.location.href='printinvoice.html?id=${inv._id}'" title="Print Output"><i class="bi bi-printer"></i></button>
