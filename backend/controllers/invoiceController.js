@@ -126,39 +126,41 @@ const updateInvoice = catchAsync(async (req, res, next) => {
   const invoice = await Invoice.findById(req.params.id);
   if (!invoice) return next(new AppError('Invoice not found', 404));
 
+  // Determine standard total mapping natively shielding UI structure modifications. Fallback to older schemas dynamically.
+  const currentTotalAmount = req.body.totalAmount !== undefined ? Number(req.body.totalAmount) : (invoice.totalAmount !== undefined ? invoice.totalAmount : invoice.amount);
+
   let customerBalanceAdjustment = 0;
 
-  if (req.body.amountPaid !== undefined || req.body.dueDate !== undefined) {
-    const rawPaid = req.body.amountPaid !== undefined ? req.body.amountPaid : invoice.amountPaid;
-    const newAmountPaid = Number(rawPaid);
+  const rawPaid = req.body.amountPaid !== undefined ? req.body.amountPaid : invoice.amountPaid;
+  const newAmountPaid = Number(rawPaid);
 
-    if (newAmountPaid > invoice.totalAmount) {
-       return next(new AppError('Amount paid cannot exceed the grand total.', 400));
-    }
-    
-    // Difference between new payment total and old payment total
-    const paymentDifference = newAmountPaid - invoice.amountPaid;
-    // That means the customer owes LESS now, so their balance DECREASES
-    customerBalanceAdjustment = -paymentDifference;
-
-    const newBalance = invoice.totalAmount - newAmountPaid;
-    
-    let newStatus = 'Partial';
-    if (newBalance === 0) { 
-      newStatus = 'Paid'; 
-    } else {
-      const targetDueDate = req.body.dueDate !== undefined ? req.body.dueDate : invoice.dueDate;
-      const isOverdue = targetDueDate && new Date() > new Date(targetDueDate);
-      if (isOverdue) newStatus = 'Overdue';
-    }
-
-    req.body.balance = newBalance;
-    req.body.status = newStatus;
+  if (newAmountPaid > currentTotalAmount) {
+     return next(new AppError('Amount paid cannot exceed the grand total.', 400));
+  }
+  
+  // Calculate specific customer account balance impact directly based off exact prior accounting records
+  const oldBalance = invoice.balance !== undefined ? invoice.balance : (invoice.status === 'Paid' ? 0 : currentTotalAmount);
+  const newBalance = currentTotalAmount - newAmountPaid;
+  
+  customerBalanceAdjustment = newBalance - oldBalance; 
+  
+  let newStatus = 'Partial';
+  if (newBalance === 0) { 
+    newStatus = 'Paid'; 
+  } else {
+    const targetDueDate = req.body.dueDate !== undefined ? req.body.dueDate : invoice.dueDate;
+    const isOverdue = targetDueDate && new Date() > new Date(targetDueDate);
+    if (isOverdue) newStatus = 'Overdue';
   }
 
+  req.body.totalAmount = currentTotalAmount;
+  req.body.amountPaid = newAmountPaid;
+  req.body.balance = newBalance;
+  req.body.status = newStatus;
+
+  // WARNING: Pure array manipulation bypassing atomic stock increments. Safe for accounting fixes.
   const updatedInvoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   
-  // Safely persist to Customer table outside the primary document save
   if (customerBalanceAdjustment !== 0 && invoice.customer) {
       await Customer.findByIdAndUpdate(invoice.customer, { $inc: { balance: customerBalanceAdjustment } });
   }

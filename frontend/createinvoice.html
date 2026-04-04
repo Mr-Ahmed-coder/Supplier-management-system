@@ -392,6 +392,7 @@
           location,
           date, 
           dueDate: dueDate ? dueDate : undefined,
+          totalAmount: parseFloat(document.getElementById("invoiceAmount").dataset.rawTotal || 0),
           amountPaid,
           items: formattedItems
         };
