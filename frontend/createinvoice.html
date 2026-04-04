@@ -366,7 +366,8 @@
             product: item.productId,
             productName: item.productName,
             quantity: item.quantity,
-            price: item.price
+            price: item.price,
+            subtotal: item.subtotal
         }));
 
         const matchingCust = Array.isArray(customers) ? customers.find(c => c.name && c.name.toLowerCase() === name.toLowerCase()) : null;
