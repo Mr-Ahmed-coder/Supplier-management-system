@@ -124,7 +124,8 @@
               <div class="row g-4">
                 <div class="col-md-6">
                   <label class="form-label text-secondary small fw-semibold">Customer Name</label>
-                  <input type="text" class="form-control bg-light border-0" id="customerName" required maxlength="100" placeholder="e.g. Acme Corp">
+                  <input type="text" class="form-control bg-light border-0" id="customerName" required maxlength="100" placeholder="Search customer or add fresh..." list="customerListOptions" autocomplete="off">
+                  <datalist id="customerListOptions"></datalist>
                 </div>
                 <div class="col-md-6">
                   <label class="form-label text-secondary small fw-semibold">Phone Number (Optional)</label>
@@ -180,6 +181,17 @@
         try {
           const custRes = await fetch(`${API_URL}/customers?_t=${Date.now()}`, { headers: getAuthHeaders(), cache: "no-store" });
           customers = await custRes.json();
+          
+          const customerList = document.getElementById("customerListOptions");
+          if (customerList && customers) {
+             customers.forEach(c => {
+                if (c.name) {
+                   const opt = document.createElement("option");
+                   opt.value = c.name;
+                   customerList.appendChild(opt);
+                }
+             });
+          }
 
           const prodRes = await fetch(`${API_URL}/products?_t=${Date.now()}`, { headers: getAuthHeaders(), cache: "no-store" });
           products = await prodRes.json();
@@ -413,6 +425,17 @@
             alert("System Error: " + err.message);
             console.error(err); 
         }
+      });
+
+      document.getElementById("customerName").addEventListener("input", function() {
+          const val = this.value.trim().toLowerCase();
+          if (!val) return;
+          const match = customers.find(c => c.name && c.name.toLowerCase() === val);
+          if (match) {
+              if (match.phone) document.getElementById("customerPhone").value = match.phone;
+              const place = match.location || match.company || "";
+              if (place) document.getElementById("customerLocation").value = place;
+          }
       });
 
       document.getElementById("deleteInvoiceBtn").addEventListener("click", async function () {
