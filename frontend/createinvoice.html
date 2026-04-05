@@ -58,11 +58,11 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
-                  <span class="text-dark fw-bold mb-2 d-block">Amount Paid</span>
-                  <div class="d-flex align-items-center mt-1">
-                    <span class="fs-4 fw-bold text-dark me-2">UGX</span>
-                    <input type="number" class="form-control p-0 m-0 border-0 fw-bold text-dark shadow-none bg-transparent" id="amountPaid" min="0" value="0" style="font-size: 1.5rem;">
+                <div class="card bg-light border-primary border-opacity-25 shadow-sm h-100 p-3 rounded-3">
+                  <label for="amountPaid" class="text-dark fw-bold mb-2 d-block">Amount Paid</label>
+                  <div class="input-group mt-1 shadow-sm">
+                    <span class="input-group-text bg-white text-secondary fw-bold border-end-0">UGX</span>
+                    <input type="number" class="form-control fw-bold text-dark border-start-0" id="amountPaid" min="0" placeholder="Enter amount paid" style="font-size: 1.25rem;">
                   </div>
                 </div>
               </div>
@@ -70,7 +70,7 @@
                 <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
                   <span class="text-dark fw-bold mb-2 d-block">Remaining Balance</span>
                   <div class="d-flex align-items-center mt-1">
-                    <span class="fs-4 fw-bold text-danger me-2">UGX</span>
+                    <span id="invoiceBalanceLabel" class="fs-4 fw-bold text-danger me-2">UGX</span>
                     <input type="text" class="form-control-plaintext fw-bold text-danger p-0 m-0 pointer-events-none" id="invoiceBalance" readonly value="0" style="font-size: 1.5rem;">
                   </div>
                 </div>
@@ -240,10 +240,10 @@
               }
               
               if (inv.amountPaid !== undefined) {
-                  document.getElementById("amountPaid").value = inv.amountPaid;
+                  document.getElementById("amountPaid").value = inv.amountPaid || "";
               } else {
                   // Legacy Fallback mapping
-                  document.getElementById("amountPaid").value = inv.status === 'Paid' ? (inv.totalAmount || inv.amount) : 0;
+                  document.getElementById("amountPaid").value = inv.status === 'Paid' ? (inv.totalAmount || inv.amount) : "";
               }
               
               if (inv.items && Array.isArray(inv.items)) {
@@ -323,7 +323,19 @@
           const totalRaw = parseFloat(document.getElementById("invoiceAmount").dataset.rawTotal || 0);
           const paidRaw = parseFloat(document.getElementById("amountPaid").value || 0);
           const balance = Math.max(0, totalRaw - paidRaw);
-          document.getElementById("invoiceBalance").value = balance.toLocaleString('en-US');
+          
+          const balInput = document.getElementById("invoiceBalance");
+          const balLabel = document.getElementById("invoiceBalanceLabel");
+          
+          balInput.value = balance.toLocaleString('en-US');
+          
+          if (balance === 0 && totalRaw > 0) {
+              balInput.className = "form-control-plaintext fw-bold text-success p-0 m-0 pointer-events-none";
+              if (balLabel) balLabel.className = "fs-4 fw-bold text-success me-2";
+          } else {
+              balInput.className = "form-control-plaintext fw-bold text-danger p-0 m-0 pointer-events-none";
+              if (balLabel) balLabel.className = "fs-4 fw-bold text-danger me-2";
+          }
       }
 
       function renderCart() {
