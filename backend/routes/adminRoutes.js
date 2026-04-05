@@ -2,6 +2,9 @@ const express = require('express');
 const router = express.Router();
 const mongoose = require('mongoose');
 const { protect, adminOnly } = require('../middleware/auth');
+const Invoice = require('../models/Invoice');
+const Product = require('../models/Product');
+const Receipt = require('../models/Receipt');
 
 router.get('/db-stats', protect, adminOnly, async (req, res, next) => {
     try {
@@ -30,6 +33,24 @@ router.get('/db-stats', protect, adminOnly, async (req, res, next) => {
              storageSizeMB: "0.00",
              error: err.message
         });
+    }
+});
+
+router.delete('/reset', protect, adminOnly, async (req, res, next) => {
+    const session = await mongoose.startSession();
+    session.startTransaction();
+    try {
+        await Invoice.deleteMany({}).session(session);
+        await Product.deleteMany({}).session(session);
+        await Receipt.deleteMany({}).session(session);
+        
+        await session.commitTransaction();
+        session.endSession();
+        res.json({ message: "System structurally reset. Volatile ledgers cleared." });
+    } catch (err) {
+        await session.abortTransaction();
+        session.endSession();
+        res.status(500).json({ message: "System Reset Failed. Transaction Aborted.", error: err.message });
     }
 });
 
