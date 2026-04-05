@@ -94,7 +94,7 @@
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>Company</th>
+                  <th>Customer Location</th>
                   <th>Balance</th>
                   <th>Status</th>
                   <th>Actions</th>
@@ -134,8 +134,8 @@
           <input type="tel" id="custPhone" class="form-control" maxlength="20" placeholder="e.g. +256 700 123456">
         </div>
         <div class="mb-3">
-          <label class="form-label">Company</label>
-          <input type="text" id="custCompany" class="form-control" maxlength="100" placeholder="e.g. Glow Beauty Salon">
+          <label class="form-label">Customer Location</label>
+          <input type="text" id="custCompany" class="form-control" maxlength="100" placeholder="e.g. Kampala, Uganda">
         </div>
         <div class="mb-3">
           <label class="form-label">Balance / Outstanding (UGX)</label>
@@ -327,7 +327,7 @@ async function viewCustomer(id) {
       <h4 class="fw-bold mb-3">${c.name}</h4>
       <div class="d-flex align-items-center mb-2"><i class="bi bi-envelope text-primary me-3 fs-5"></i><span>${c.email || "No email"}</span></div>
       <div class="d-flex align-items-center mb-2"><i class="bi bi-telephone text-primary me-3 fs-5"></i><span>${c.phone || "No phone"}</span></div>
-      <div class="d-flex align-items-center mb-2"><i class="bi bi-building text-primary me-3 fs-5"></i><span>${c.company || "No company"}</span></div>
+      <div class="d-flex align-items-center mb-2"><i class="bi bi-geo-alt text-primary me-3 fs-5"></i><span>${c.company || "No location listed"}</span></div>
       <div class="d-flex align-items-center mt-3 pt-3 border-top">
         <strong class="me-2">Current Balance:</strong> 
         <span class="fs-5 fw-bold text-danger">UGX ${Number(c.balance).toLocaleString('en-US')}</span>
