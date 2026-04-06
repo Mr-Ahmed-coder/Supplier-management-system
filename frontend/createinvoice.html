@@ -46,39 +46,36 @@
         <div class="row justify-content-center">
           <div class="col-lg-11">
             
-            <!-- Financial Summary Cards -->
-            <div class="row g-3 mb-4">
-              <div class="col-md-4">
-                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
-                  <span class="text-dark fw-bold mb-2 d-block">Grand Total (UGX)</span>
-                  <div class="d-flex align-items-center mt-1">
-                    <span class="fs-4 fw-bold text-primary me-2">UGX</span>
-                    <input type="text" class="form-control-plaintext fw-bold text-primary p-0 m-0 pointer-events-none" id="invoiceAmount" readonly value="0" data-raw-total="0" style="font-size: 1.5rem;">
-                  </div>
+            <!-- Invoice Information Section -->
+            <h5 class="fw-bold text-dark mb-3">Invoice Information</h5>
+            <div class="card shadow-sm border-0 mb-4 p-4 rounded-3">
+              <div class="row g-4">
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Customer Name</label>
+                  <input type="text" class="form-control bg-light border-0" id="customerName" required maxlength="100" placeholder="Search customer or add fresh..." list="customerListOptions" autocomplete="off">
+                  <datalist id="customerListOptions"></datalist>
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card bg-light border-primary border-opacity-25 shadow-sm h-100 p-3 rounded-3">
-                  <label for="amountPaid" class="text-dark fw-bold mb-2 d-block">Amount Paid</label>
-                  <div class="input-group mt-1 shadow-sm">
-                    <span class="input-group-text bg-white text-secondary fw-bold border-end-0">UGX</span>
-                    <input type="number" class="form-control fw-bold text-dark border-start-0" id="amountPaid" min="0" placeholder="Enter amount paid" style="font-size: 1.25rem;">
-                  </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Phone Number (Optional)</label>
+                  <input type="tel" class="form-control bg-light border-0" id="customerPhone" placeholder="e.g. +256 700 000000">
                 </div>
-              </div>
-              <div class="col-md-4">
-                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
-                  <span class="text-dark fw-bold mb-2 d-block">Remaining Balance</span>
-                  <div class="d-flex align-items-center mt-1">
-                    <span id="invoiceBalanceLabel" class="fs-4 fw-bold text-danger me-2">UGX</span>
-                    <input type="text" class="form-control-plaintext fw-bold text-danger p-0 m-0 pointer-events-none" id="invoiceBalance" readonly value="0" style="font-size: 1.5rem;">
-                  </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Customer Location (Optional)</label>
+                  <input type="text" class="form-control bg-light border-0" id="customerLocation" placeholder="e.g. Kampala, Uganda">
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Date Issued</label>
+                  <input type="date" class="form-control bg-light border-0" id="invoiceDate" required>
+                </div>
+                <div class="col-md-6">
+                  <label class="form-label text-secondary small fw-semibold">Expected Payment Date (Optional)</label>
+                  <input type="date" class="form-control bg-light border-0" id="invoiceDueDate">
                 </div>
               </div>
             </div>
 
             <!-- Items Cart Section -->
-            <h5 class="fw-bold text-dark mb-3 mt-5">Invoice Items</h5>
+            <h5 class="fw-bold text-dark mb-3 mt-4">Invoice Items</h5>
             <div class="card shadow-sm border-0 mb-4 p-4 rounded-3">
               <div class="row g-3 align-items-end mb-4">
                 <div class="col-md-5">
@@ -118,30 +115,34 @@
               </div>
             </div>
 
-            <!-- Invoice Information Section -->
-            <h5 class="fw-bold text-dark mb-3 mt-5">Invoice Information</h5>
-            <div class="card shadow-sm border-0 mb-5 p-4 rounded-3">
-              <div class="row g-4">
-                <div class="col-md-6">
-                  <label class="form-label text-secondary small fw-semibold">Customer Name</label>
-                  <input type="text" class="form-control bg-light border-0" id="customerName" required maxlength="100" placeholder="Search customer or add fresh..." list="customerListOptions" autocomplete="off">
-                  <datalist id="customerListOptions"></datalist>
+            <!-- Financial Summary Cards -->
+            <h5 class="fw-bold text-dark mb-3 mt-4">Financial Summary</h5>
+            <div class="row g-3 mb-5">
+              <div class="col-md-4">
+                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
+                  <span class="text-dark fw-bold mb-2 d-block">Grand Total (UGX)</span>
+                  <div class="d-flex align-items-center mt-1">
+                    <span class="fs-4 fw-bold text-primary me-2">UGX</span>
+                    <input type="text" class="form-control-plaintext fw-bold text-primary p-0 m-0 pointer-events-none" id="invoiceAmount" readonly value="0" data-raw-total="0" style="font-size: 1.5rem;">
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label text-secondary small fw-semibold">Phone Number (Optional)</label>
-                  <input type="tel" class="form-control bg-light border-0" id="customerPhone" placeholder="e.g. +256 700 000000">
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-light border-primary border-opacity-25 shadow-sm h-100 p-3 rounded-3">
+                  <label for="amountPaid" class="text-dark fw-bold mb-2 d-block">Amount Paid</label>
+                  <div class="input-group mt-1 shadow-sm">
+                    <span class="input-group-text bg-white text-secondary fw-bold border-end-0">UGX</span>
+                    <input type="number" class="form-control fw-bold text-dark border-start-0" id="amountPaid" min="0" placeholder="Enter amount paid" style="font-size: 1.25rem;">
+                  </div>
                 </div>
-                <div class="col-md-6">
-                  <label class="form-label text-secondary small fw-semibold">Customer Location (Optional)</label>
-                  <input type="text" class="form-control bg-light border-0" id="customerLocation" placeholder="e.g. Kampala, Uganda">
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-secondary small fw-semibold">Date Issued</label>
-                  <input type="date" class="form-control bg-light border-0" id="invoiceDate" required>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-secondary small fw-semibold">Expected Payment Date (Optional)</label>
-                  <input type="date" class="form-control bg-light border-0" id="invoiceDueDate">
+              </div>
+              <div class="col-md-4">
+                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
+                  <span class="text-dark fw-bold mb-2 d-block">Remaining Balance</span>
+                  <div class="d-flex align-items-center mt-1">
+                    <span id="invoiceBalanceLabel" class="fs-4 fw-bold text-danger me-2">UGX</span>
+                    <input type="text" class="form-control-plaintext fw-bold text-danger p-0 m-0 pointer-events-none" id="invoiceBalance" readonly value="0" style="font-size: 1.5rem;">
+                  </div>
                 </div>
               </div>
             </div>
