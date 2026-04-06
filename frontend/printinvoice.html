@@ -1,70 +1,204 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Invoice Print</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Receipt Print</title>
 
   <style>
-    *
-    /* { margin: 0; padding: 0; box-sizing: border-box; }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Courier New', Courier, monospace;
+      background: #f4f4f4;
+      color: #000;
+      font-size: 13px;
+    }
+    
+    .action-bar {
+      text-align: center;
+      padding: 15px;
+      background: #fff;
+      margin-bottom: 20px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .btn-back, .btn-print {
+      padding: 10px 20px;
+      font-size: 14px;
+      margin: 0 10px;
+      cursor: pointer;
+      border: 1px solid #ccc;
+      background: #eee;
+      border-radius: 4px;
+      font-family: Arial, sans-serif;
+    }
+    
+    .btn-print {
+      background: #0d6efd;
+      color: white;
+      border: none;
+      font-weight: bold;
+    }
 
-  body {
-    font-family: 'Segoe UI', Arial, sans-serif;
-    background: #f4f4f4;
-    padding: 20px;
-  }
+    /* Thermal Receipt Container - ~300px width */
+    .receipt {
+      width: 300px;
+      max-width: 100%;
+      margin: 0 auto;
+      background: #fff;
+      padding: 15px 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.2);
+    }
 
-  /* Top action bar — hidden when printing */
-    */
+    .header {
+      text-align: center;
+      margin-bottom: 10px;
+    }
+    
+    .header h1 {
+      font-size: 18px;
+      font-weight: bold;
+      margin-bottom: 5px;
+      text-transform: uppercase;
+    }
+    
+    .header p {
+      font-size: 12px;
+      margin: 2px 0;
+    }
+
+    .separator {
+      border-top: 1px dashed #000;
+      margin: 10px 0;
+    }
+
+    .info-section {
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    
+    .info-section p {
+      margin: 3px 0;
+    }
+
+    /* Items Table */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 10px;
+      font-size: 12px;
+    }
+    
+    th, td {
+      padding: 4px 2px;
+      vertical-align: top;
+    }
+    
+    th {
+      border-bottom: 1px dashed #000;
+      text-align: left;
+      font-weight: bold;
+    }
+    
+    .text-right { text-align: right; }
+    .text-center { text-align: center; }
+
+    /* Summary */
+    .summary {
+      margin-top: 10px;
+      padding-top: 5px;
+      font-size: 12px;
+    }
+    
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      margin: 4px 0;
+    }
+    
+    .summary-line.bold {
+      font-weight: bold;
+      font-size: 13px;
+    }
+
+    .footer {
+      text-align: center;
+      margin-top: 15px;
+      font-size: 11px;
+    }
+
+    /* Print Optimization - Hide UI, kill margins */
+    @media print {
+      body {
+        background: transparent;
+        padding: 0;
+        margin: 0;
+      }
+      .action-bar {
+        display: none !important;
+      }
+      .receipt {
+        width: auto;
+        max-width: 300px;
+        margin: 0;
+        padding: 0;
+        box-shadow: none;
+      }
+      /* Prevent massive outer margins imposed by OS printing dialogs */
+      @page {
+        margin: 0;
+      }
+    }
   </style>
 </head>
-
 <body>
 
-  <!-- Action buttons — hidden during print -->
   <div class="action-bar">
     <button class="btn-back" onclick="window.history.back()">&#8592; Back</button>
-    <button class="btn-print" onclick="window.print()">&#128438; Print / Download PDF</button>
+    <button class="btn-print" onclick="window.print()">&#128438; Print Thermal Receipt</button>
   </div>
 
-  <div class="invoice">
-
+  <div class="receipt">
     <div class="header">
-      <h1 style="margin-bottom: 5px;">Tumi Cosmetics</h1>
-      <h3 id="invoiceNumber" style="margin-bottom: 6px; color: white;">INVOICE #</h3>
-      <p id="invoiceDates">Date: --- | Expected Payment: ---</p>
+      <h1>Tumi Cosmetics</h1>
+      <p id="invoiceNumber">INVOICE #</p>
+      <p id="invoiceDates">Date: ---</p>
     </div>
 
-    <div class="customer-info">
-      <h3>Customer:</h3>
-      <p id="customerName">Loading...</p>
+    <div class="separator"></div>
+
+    <div class="info-section">
+      <p><span id="customerName">Loading...</span></p>
     </div>
 
-    <table class="invoice-table">
+    <div class="separator"></div>
+
+    <table>
       <thead>
         <tr>
           <th>Item</th>
-          <th>Qty</th>
-          <th>Price</th>
-          <th>Total</th>
+          <th class="text-center">Qty</th>
+          <th class="text-right">Total</th>
         </tr>
       </thead>
       <tbody id="itemsBody">
         <tr>
-          <td colspan="4" style="text-align:center;color:#aaa;">Loading...</td>
+          <td colspan="3" class="text-center">Loading...</td>
         </tr>
       </tbody>
     </table>
+
+    <div class="separator"></div>
 
     <div class="summary" id="summarySection">
       <!-- Filled by JS -->
     </div>
 
-    <div class="invoice-footer">
-      Tumi cosmetics &mdash; Thank you for your business!
+    <div class="separator"></div>
+
+    <div class="footer" id="footerSection">
+      <p>Thank you for your business!</p>
+      <p style="margin-top:5px;">***</p>
     </div>
 
   </div>
@@ -92,20 +226,8 @@
       return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
     }
 
-    function getExpectedPaymentDate(inv) {
-      if (inv.dueDate) {
-        const d = new Date(inv.dueDate);
-        if (!isNaN(d)) return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-      }
-      if (!inv.date && !inv.createdAt) return '---';
-      const d = new Date(inv.date || inv.createdAt);
-      if (isNaN(d)) return '---';
-      d.setDate(d.getDate() + 30); // Fallback: 30 days after issue
-      return d.toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
-    }
-
     function formatCurrency(num) {
-      return Number(num).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+      return Number(num).toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
     }
 
     async function loadInvoice() {
@@ -118,7 +240,6 @@
       }
 
       try {
-        // Fetch invoice
         const invRes = await fetch(`${API_URL}/invoices`, { headers: getAuthHeaders() });
         const invoices = await invRes.json();
         const inv = invoices.find(x => x._id === invoiceId);
@@ -128,65 +249,50 @@
           return;
         }
 
-        // Header
-        document.getElementById('invoiceNumber').textContent = `INVOICE #${inv.number}`;
-        document.getElementById('invoiceDates').textContent =
-          `Date: ${formatDate(inv.date || inv.createdAt)} | Expected Payment: ${getExpectedPaymentDate(inv)}`;
-        document.title = `Invoice ${inv.number}`;
+        document.getElementById('invoiceNumber').textContent = `INV #${inv.number}`;
+        document.getElementById('invoiceDates').textContent = `Date: ${formatDate(inv.date || inv.createdAt)}`;
+        document.title = `Receipt ${inv.number}`;
 
-        // Customer
-        const custName = inv.customerName || (inv.customer ? inv.customer.name : 'Unknown');
-        const custLocation = inv.location ? `<br><small style="font-weight:normal; font-size:0.9em; color:#555;">Location: ${inv.location}</small>` : '';
-        document.getElementById('customerName').innerHTML = `${custName}${custLocation}`;
+        const custName = inv.customerName || (inv.customer ? inv.customer.name : 'Unknown Customer');
+        const custLocation = inv.location ? `<br>Location: ${inv.location}` : '';
+        const expectedPayment = inv.balance > 0 && inv.dueDate ? `<br>Due By: ${formatDate(inv.dueDate)}` : '';
+        document.getElementById('customerName').innerHTML = `<strong>${custName}</strong>${custLocation}${expectedPayment}`;
 
-        // Items table — loop through cart items
         const tbody = document.getElementById('itemsBody');
         if (inv.items && inv.items.length > 0) {
             tbody.innerHTML = inv.items.map(item => `
               <tr>
-                <td>${item.productName || (item.product && item.product.name ? item.product.name : 'Cosmetic Item')}</td>
-                <td>${item.quantity}</td>
-                <td>${formatCurrency(item.price)}</td>
-                <td>${formatCurrency(item.subtotal)}</td>
+                <td>${item.productName || (item.product && item.product.name ? item.product.name : 'Item')}</td>
+                <td class="text-center">${item.quantity}</td>
+                <td class="text-right">${formatCurrency(item.subtotal)}</td>
               </tr>
             `).join('');
         } else {
-            // Backward compatibility for old invoices
             tbody.innerHTML = `
             <tr>
-              <td>Legacy Invoice Charge</td>
-              <td>1</td>
-              <td>${formatCurrency(inv.amount)}</td>
-              <td>${formatCurrency(inv.amount)}</td>
+              <td>Invoice Charge</td>
+              <td class="text-center">1</td>
+              <td class="text-right">${formatCurrency(inv.amount)}</td>
             </tr>
           `;
         }
 
-        // Fetch receipts (payments) linked to this invoice
         let totalPaid = 0;
         try {
           const rcptRes = await fetch(`${API_URL}/receipts`, { headers: getAuthHeaders() });
           const receipts = await rcptRes.json();
-          const linkedReceipts = receipts.filter(r =>
-            (r.invoice && (r.invoice === invoiceId || r.invoice._id === invoiceId))
-          );
-
-          // Add paid receipt rows to the items table if any
+          const linkedReceipts = receipts.filter(r => (r.invoice && (r.invoice === invoiceId || r.invoice._id === invoiceId)));
           if (linkedReceipts.length > 0) {
-            linkedReceipts.forEach(r => {
-              totalPaid += Number(r.amount);
-            });
+            linkedReceipts.forEach(r => { totalPaid += Number(r.amount); });
           }
         } catch (e) {
           console.log('Could not fetch receipts:', e);
         }
 
-        // Summary
         const totalAmount = inv.totalAmount !== undefined ? inv.totalAmount : (inv.amount || 0);
         let amountPaid = inv.amountPaid !== undefined ? inv.amountPaid : (inv.status === 'Paid' ? totalAmount : 0);
         let balance = inv.balance !== undefined ? inv.balance : Math.max(0, totalAmount - amountPaid);
 
-        // Fallback calculation for ancient receipts
         if (inv.amountPaid === undefined && totalPaid > amountPaid) {
             amountPaid = totalPaid;
             balance = Math.max(0, totalAmount - amountPaid);
@@ -194,19 +300,24 @@
 
         const summary = document.getElementById('summarySection');
 
-        let statusClass = 'pending';
-        if (inv.status === 'Paid') statusClass = 'paid';
-        else if (inv.status === 'Overdue' || inv.status === 'Unpaid') statusClass = 'overdue';
-        else if (inv.status === 'Partial') statusClass = 'pending'; // CSS reuse for yellow/orange
-
         summary.innerHTML = `
-        <p><strong>Grand Total:</strong> UGX ${formatCurrency(totalAmount)}</p>
-        ${amountPaid > 0 ? `<p class="paid"><strong>Amount Paid:</strong> UGX ${formatCurrency(amountPaid)}</p>` : ''}
-        <p class="amount-highlight ${statusClass}">
-          <strong>${inv.status === 'Paid' ? 'Fully Paid' : 'Remaining Balance'}:</strong>
-          UGX ${formatCurrency(balance)}
-        </p>
-        <p style="margin-top:8px;font-size:13px;color:#000;font-weight:bold;">Status: <span class="${statusClass}" style="text-transform:uppercase;">${inv.status}</span></p>
+        <div class="summary-line bold">
+          <span>Total:</span>
+          <span>UGX ${formatCurrency(totalAmount)}</span>
+        </div>
+        ${amountPaid > 0 ? `
+        <div class="summary-line">
+          <span>Paid:</span>
+          <span>UGX ${formatCurrency(amountPaid)}</span>
+        </div>` : ''}
+        <div class="summary-line ${balance > 0 ? 'bold' : ''}">
+          <span>Balance:</span>
+          <span>UGX ${formatCurrency(balance)}</span>
+        </div>
+        <div class="summary-line" style="margin-top:8px; border-top: 1px dotted #ccc; padding-top: 4px;">
+          <span>Status:</span>
+          <span style="font-weight:bold;">${inv.status.toUpperCase()}</span>
+        </div>
       `;
 
       } catch (err) {
@@ -217,7 +328,5 @@
 
     loadInvoice();
   </script>
-
 </body>
-
 </html>
