@@ -163,11 +163,11 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
-                  <span class="text-dark fw-bold mb-2 d-block">Amount Paid</span>
+                <div class="card shadow-sm h-100 p-3 rounded-3 border-opacity-25 border" id="amountPaidCard" style="background-color: #f8f9fa;">
+                  <span class="text-dark fw-bold mb-2 d-block" id="amountPaidLabel">Initial Payment (Optional)</span>
                   <div class="d-flex align-items-center mt-1">
                     <span class="fs-4 fw-bold text-dark me-2">UGX</span>
-                    <input type="text" class="form-control-plaintext fw-bold text-dark p-0 m-0 pointer-events-none" id="amountPaid" readonly value="0" style="font-size: 1.5rem;">
+                    <input type="number" class="form-control fw-bold text-dark p-0 m-0 border-0 bg-transparent" id="amountPaid" min="0" placeholder="0" style="font-size: 1.5rem; outline: none !important; box-shadow: none !important;">
                   </div>
                 </div>
               </div>
@@ -299,6 +299,13 @@
                 if (!isNaN(dd)) document.getElementById("invoiceDueDate").value = dd.toISOString().split('T')[0];
               }
               
+              const amtInput = document.getElementById("amountPaid");
+              amtInput.type = "text";
+              amtInput.className = "form-control-plaintext fw-bold text-dark p-0 m-0 pointer-events-none";
+              amtInput.readOnly = true;
+              document.getElementById("amountPaidLabel").innerText = "Amount Paid";
+              document.getElementById("amountPaidCard").className = "card bg-white border shadow-sm h-100 p-3 rounded-3";
+
               if (inv.amountPaid !== undefined) {
                   document.getElementById("amountPaid").value = (inv.amountPaid || 0).toLocaleString('en-US');
               } else {
@@ -382,9 +389,12 @@
           renderCart();
       };
 
+      document.getElementById("amountPaid").addEventListener("input", calculateBalance);
+
       function calculateBalance() {
           const totalRaw = parseFloat(document.getElementById("invoiceAmount").dataset.rawTotal || 0);
-          const paidRaw = parseFloat(document.getElementById("amountPaid").dataset.rawPaid || document.getElementById("amountPaid").value.replace(/,/g, '') || 0);
+          const valStr = document.getElementById("amountPaid").value || "0";
+          const paidRaw = parseFloat(document.getElementById("amountPaid").dataset.rawPaid || valStr.replace(/,/g, '') || 0);
           const balance = Math.max(0, totalRaw - paidRaw);
           
           const balInput = document.getElementById("invoiceBalance");
@@ -437,7 +447,7 @@
         const location = document.getElementById("customerLocation").value.trim();
         const date = document.getElementById("invoiceDate").value;
         const dueDate = document.getElementById("invoiceDueDate").value;
-        const amountPaid = document.getElementById("amountPaid").dataset.rawPaid || document.getElementById("amountPaid").value.replace(/,/g, '');
+        const amountPaid = editId ? (document.getElementById("amountPaid").dataset.rawPaid || 0) : 0;
 
         if (!name || !date) return alert("Please fill all required invoice details.");
         if (cartItems.length === 0) return alert("Please add at least one item to the cart before saving.");
@@ -491,6 +501,29 @@
           }
 
           if (res.ok) {
+            const savedInvoice = await res.json();
+            
+            // Post-Process: Automatically create a Receipt for the Initial Payment natively targeting zero-deduction frameworks
+            if (!editId) {
+                const initialInputStr = document.getElementById("amountPaid").value || "0";
+                const initialPayment = parseFloat(initialInputStr.replace(/,/g, ''));
+                if (!isNaN(initialPayment) && initialPayment > 0) {
+                    const rcptPayload = {
+                        number: "RCPT-" + Date.now(),
+                        invoice: savedInvoice._id,
+                        customer: savedInvoice.customer,
+                        amount: initialPayment,
+                        date: date,
+                        method: "Cash" // Standard POS proxy default
+                    };
+                    await fetch(`${API_URL}/receipts`, {
+                        method: 'POST',
+                        headers: getAuthHeaders(),
+                        body: JSON.stringify(rcptPayload)
+                    });
+                }
+            }
+
             window.location.href = "invoice.html";
           } else {
             const errData = await res.json().catch(() => ({}));
