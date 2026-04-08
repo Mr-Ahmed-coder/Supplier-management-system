@@ -175,7 +175,24 @@ const updateInvoice = catchAsync(async (req, res, next) => {
   req.body.balance = newBalance;
   req.body.status = newStatus;
 
-  // WARNING: Pure array manipulation bypassing atomic stock increments. Safe for accounting fixes.
+  // Safe handling: strictly restore existing stock unconditionally prior
+  if (invoice.items && invoice.items.length > 0) {
+    for (const oldItem of invoice.items) {
+      if (oldItem.product) {
+        await Product.findByIdAndUpdate(oldItem.product, { $inc: { stock: oldItem.quantity } });
+      }
+    }
+  }
+
+  // Safe handling: accurately deduct new structural mapped quantities
+  if (req.body.items && req.body.items.length > 0) {
+    for (const newItem of req.body.items) {
+      if (newItem.product) {
+        await Product.findByIdAndUpdate(newItem.product, { $inc: { stock: -newItem.quantity } });
+      }
+    }
+  }
+
   const updatedInvoice = await Invoice.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   
   if (customerBalanceAdjustment !== 0 && invoice.customer) {
@@ -189,8 +206,7 @@ const deleteInvoice = catchAsync(async (req, res, next) => {
   const invoice = await Invoice.findById(req.params.id);
   if (!invoice) return next(new AppError('Invoice not found', 404));
 
-  await invoice.deleteOne();
-  res.json({ message: 'Invoice removed' });
+  return next(new AppError('Invoice deletion is securely disabled to eliminate orphaned ledger data. Future voiding architectures pending.', 403));
 });
 
 const exportInvoicesCSV = catchAsync(async (req, res, next) => {

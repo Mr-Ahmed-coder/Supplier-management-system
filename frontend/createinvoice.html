@@ -554,7 +554,8 @@
             if (res.ok) {
               window.location.href = "invoice.html";
             } else {
-              alert("Restricted: Admins only.");
+              const info = await res.json().catch(()=>({}));
+              alert(info.message || "Restricted: Admins only.");
             }
           } catch (err) { console.error(err); }
         }
