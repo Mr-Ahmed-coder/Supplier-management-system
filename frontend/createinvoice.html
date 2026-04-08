@@ -12,6 +12,41 @@
 
 <body>
 
+  <!-- Log Payment Modal -->
+  <div class="modal fade" id="addPaymentModal" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-success shadow-lg">
+        <div class="modal-header bg-success text-white border-0">
+          <h5 class="modal-title fw-bold"><i class="bi bi-cash-stack me-2"></i>Log Partial Payment</h5>
+          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label class="form-label text-dark fw-bold">Amount (UGX)</label>
+            <input type="number" id="payAmountInput" class="form-control bg-light" min="1" placeholder="e.g. 50000">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-dark fw-bold">Date of Payment</label>
+            <input type="date" id="payDateInput" class="form-control bg-light">
+          </div>
+          <div class="mb-3">
+            <label class="form-label text-dark fw-bold">Payment Method</label>
+            <select id="payMethodInput" class="form-select bg-light">
+              <option value="Cash">Cash</option>
+              <option value="Mobile Money">Mobile Money</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Cheque">Cheque</option>
+            </select>
+          </div>
+        </div>
+        <div class="modal-footer border-0 p-4 pt-0">
+          <button class="btn btn-secondary px-4" data-bs-dismiss="modal">Cancel</button>
+          <button class="btn btn-success px-4 fw-bold" id="submitPaymentBtn">Save Payment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div id="wrapper">
     <!-- Sidebar -->
     <div id="sidebar-wrapper"></div>
@@ -128,11 +163,11 @@
                 </div>
               </div>
               <div class="col-md-4">
-                <div class="card bg-light border-primary border-opacity-25 shadow-sm h-100 p-3 rounded-3">
-                  <label for="amountPaid" class="text-dark fw-bold mb-2 d-block">Amount Paid</label>
-                  <div class="input-group mt-1 shadow-sm">
-                    <span class="input-group-text bg-white text-secondary fw-bold border-end-0">UGX</span>
-                    <input type="number" class="form-control fw-bold text-dark border-start-0" id="amountPaid" min="0" placeholder="Enter amount paid" style="font-size: 1.25rem;">
+                <div class="card bg-white border shadow-sm h-100 p-3 rounded-3">
+                  <span class="text-dark fw-bold mb-2 d-block">Amount Paid</span>
+                  <div class="d-flex align-items-center mt-1">
+                    <span class="fs-4 fw-bold text-dark me-2">UGX</span>
+                    <input type="text" class="form-control-plaintext fw-bold text-dark p-0 m-0 pointer-events-none" id="amountPaid" readonly value="0" style="font-size: 1.5rem;">
                   </div>
                 </div>
               </div>
@@ -144,6 +179,30 @@
                     <input type="text" class="form-control-plaintext fw-bold text-danger p-0 m-0 pointer-events-none" id="invoiceBalance" readonly value="0" style="font-size: 1.5rem;">
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <!-- Payment Ledger Section -->
+            <div id="paymentLedgerSection" style="display:none;" class="mb-5">
+              <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-dark m-0">Payment History</h5>
+                <button class="btn btn-sm btn-success shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addPaymentModal"><i class="bi bi-cash-coin me-1"></i> Log Payment</button>
+              </div>
+              <div class="table-responsive border rounded-3 bg-white shadow-sm">
+                <table class="table table-hover align-middle mb-0">
+                  <thead class="bg-light text-secondary text-uppercase small" style="font-size: 0.8rem; border-bottom: 2px solid #e2e8f0;">
+                    <tr>
+                      <th class="py-3 px-3">Date</th>
+                      <th class="py-3">Method</th>
+                      <th class="py-3 text-end">Amount (UGX)</th>
+                      <th class="py-3 text-center">Receipt #</th>
+                      <th class="text-center py-3">Action</th>
+                    </tr>
+                  </thead>
+                  <tbody id="paymentLedgerBody">
+                    <tr><td colspan="5" class="text-center text-muted py-4">No payments recorded.</td></tr>
+                  </tbody>
+                </table>
               </div>
             </div>
 
@@ -241,11 +300,12 @@
               }
               
               if (inv.amountPaid !== undefined) {
-                  document.getElementById("amountPaid").value = inv.amountPaid || "";
+                  document.getElementById("amountPaid").value = (inv.amountPaid || 0).toLocaleString('en-US');
               } else {
-                  // Legacy Fallback mapping
-                  document.getElementById("amountPaid").value = inv.status === 'Paid' ? (inv.totalAmount || inv.amount) : "";
+                  const fallback = inv.status === 'Paid' ? (inv.totalAmount || inv.amount) : 0;
+                  document.getElementById("amountPaid").value = fallback.toLocaleString('en-US');
               }
+              document.getElementById("amountPaid").dataset.rawPaid = inv.amountPaid || 0;
               
               if (inv.items && Array.isArray(inv.items)) {
                   cartItems = inv.items.map(item => ({
@@ -257,6 +317,10 @@
                   }));
               }
               renderCart();
+
+              document.getElementById('paymentLedgerSection').style.display = 'block';
+              loadPayments(editId);
+              document.getElementById("payDateInput").value = new Date().toISOString().split('T')[0];
             }
           } else {
             document.getElementById("invoiceDate").value = new Date().toISOString().split('T')[0];
@@ -318,11 +382,9 @@
           renderCart();
       };
 
-      document.getElementById("amountPaid").addEventListener("input", calculateBalance);
-
       function calculateBalance() {
           const totalRaw = parseFloat(document.getElementById("invoiceAmount").dataset.rawTotal || 0);
-          const paidRaw = parseFloat(document.getElementById("amountPaid").value || 0);
+          const paidRaw = parseFloat(document.getElementById("amountPaid").dataset.rawPaid || document.getElementById("amountPaid").value.replace(/,/g, '') || 0);
           const balance = Math.max(0, totalRaw - paidRaw);
           
           const balInput = document.getElementById("invoiceBalance");
@@ -375,7 +437,7 @@
         const location = document.getElementById("customerLocation").value.trim();
         const date = document.getElementById("invoiceDate").value;
         const dueDate = document.getElementById("invoiceDueDate").value;
-        const amountPaid = document.getElementById("amountPaid").value;
+        const amountPaid = document.getElementById("amountPaid").dataset.rawPaid || document.getElementById("amountPaid").value.replace(/,/g, '');
 
         if (!name || !date) return alert("Please fill all required invoice details.");
         if (cartItems.length === 0) return alert("Please add at least one item to the cart before saving.");
@@ -464,6 +526,94 @@
           } catch (err) { console.error(err); }
         }
       });
+
+      async function loadPayments(invoiceId) {
+          try {
+            const rcptRes = await fetch(`${API_URL}/receipts`, { headers: getAuthHeaders() });
+            const receipts = await rcptRes.json();
+            const linked = receipts.filter(r => (r.invoice && (r.invoice === invoiceId || r.invoice._id === invoiceId)));
+            
+            const tbody = document.getElementById("paymentLedgerBody");
+            if (linked.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="5" class="text-center text-muted py-4">No payments recorded.</td></tr>';
+                return;
+            }
+            
+            tbody.innerHTML = "";
+            linked.forEach(r => {
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td class="fw-semibold px-3">${r.date ? new Date(r.date).toLocaleDateString() : '---'}</td>
+                    <td><span class="badge bg-secondary text-light">${r.method || 'Cash'}</span></td>
+                    <td class="text-end fw-bold text-success">UGX ${Number(r.amount).toLocaleString('en-US')}</td>
+                    <td class="text-center font-monospace">${r.number}</td>
+                    <td class="text-center">
+                        <button class="btn btn-sm btn-outline-danger admin-only" onclick="deletePayment('${r._id}')"><i class="bi bi-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
+            });
+            if (!isAdmin) {
+                document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
+            }
+          } catch(e) { console.error(e); }
+      }
+
+      document.getElementById("submitPaymentBtn")?.addEventListener("click", async function() {
+          if(!editId) return alert("Save the invoice first before logging partial payments.");
+          const amt = document.getElementById("payAmountInput").value;
+          const dt = document.getElementById("payDateInput").value;
+          const meth = document.getElementById("payMethodInput").value;
+          if(!amt || amt <= 0) return alert("Valid amount required.");
+          
+          this.disabled = true;
+          this.innerHTML = "Saving...";
+          
+          // Fallback to searching customer by name dynamically if hidden customer mapping lacks
+          const cval = document.getElementById("customerName").value.trim().toLowerCase();
+          const targetCust = customers.find(c => c.name && c.name.toLowerCase() === cval);
+          
+          const payload = {
+              number: "RCPT-" + Date.now(),
+              invoice: editId,
+              customer: targetCust ? targetCust._id : null,
+              amount: parseFloat(amt),
+              date: dt,
+              method: meth
+          };
+          
+          try {
+              const res = await fetch(`${API_URL}/receipts`, {
+                  method: 'POST',
+                  headers: getAuthHeaders(),
+                  body: JSON.stringify(payload)
+              });
+              if(res.ok) {
+                  window.location.reload();
+              } else {
+                  const data = await res.json().catch(()=>({}));
+                  alert("Error: " + (data.message || 'Payment processing failed'));
+                  this.disabled = false;
+                  this.innerHTML = "Save Payment";
+              }
+          } catch(e) {
+              alert("Network error.");
+              this.disabled = false;
+              this.innerHTML = "Save Payment";
+          }
+      });
+      
+      window.deletePayment = async function(receiptId) {
+          if(!confirm("Are you sure you want to delete this payment record? This will revert the invoice balance back up!")) return;
+          try {
+              const res = await fetch(`${API_URL}/receipts/${receiptId}`, { method: 'DELETE', headers: getAuthHeaders() });
+              if(res.ok) {
+                  window.location.reload();
+              } else {
+                  alert("Error deleting payment. Admin privileges required.");
+              }
+          } catch(e) { console.error(e); }
+      };
 
       fetchInitialData();
     </script>
