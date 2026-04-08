@@ -278,15 +278,23 @@
         }
 
         let totalPaid = 0;
+        let receiptsHtml = '';
         try {
           const rcptRes = await fetch(`${API_URL}/receipts`, { headers: getAuthHeaders() });
           const receipts = await rcptRes.json();
           const linkedReceipts = receipts.filter(r => (r.invoice && (r.invoice === invoiceId || r.invoice._id === invoiceId)));
           if (linkedReceipts.length > 0) {
-            linkedReceipts.forEach(r => { totalPaid += Number(r.amount); });
+            linkedReceipts.forEach(r => { 
+                totalPaid += Number(r.amount); 
+                const pDate = r.date ? formatDate(r.date).replace(/,/g, '') : 'Unknown Date';
+                receiptsHtml += `<div style="font-size: 11px; margin-left: 5px; margin-bottom: 2px;">* ${pDate}: ${formatCurrency(r.amount)} UGX</div>`;
+            });
+          } else {
+            receiptsHtml = `<div style="font-size: 11px; margin-left: 5px; color: #333;">No payments recorded</div>`;
           }
         } catch (e) {
           console.log('Could not fetch receipts:', e);
+          receiptsHtml = `<div style="font-size: 11px; margin-left: 5px; color: #333;">No payments recorded</div>`;
         }
 
         const totalAmount = inv.totalAmount !== undefined ? inv.totalAmount : (inv.amount || 0);
@@ -305,13 +313,19 @@
           <span>Total:</span>
           <span>UGX ${formatCurrency(totalAmount)}</span>
         </div>
-        ${amountPaid > 0 ? `
+        
+        <div style="margin-top: 8px; margin-bottom: 8px;">
+          <div style="font-weight: bold; margin-bottom: 3px;">Payment History:</div>
+          ${receiptsHtml}
+        </div>
+        <div class="separator" style="margin: 5px 0;"></div>
+        
         <div class="summary-line">
-          <span>Paid:</span>
+          <span>Total Paid:</span>
           <span>UGX ${formatCurrency(amountPaid)}</span>
-        </div>` : ''}
+        </div>
         <div class="summary-line ${balance > 0 ? 'bold' : ''}">
-          <span>Balance:</span>
+          <span>Remaining Balance:</span>
           <span>UGX ${formatCurrency(balance)}</span>
         </div>
         <div class="summary-line" style="margin-top:8px; border-top: 1px dotted #ccc; padding-top: 4px;">
