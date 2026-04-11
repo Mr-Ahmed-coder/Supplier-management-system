@@ -77,6 +77,27 @@ document.addEventListener("DOMContentLoaded", () => {
         if (activeLink) {
             activeLink.classList.add("active");
         }
+        // Modern Mobile Backdrop Injection natively tying to Sidebar DOM
+        let backdrop = document.querySelector('.sidebar-backdrop');
+        if (!backdrop) {
+            backdrop = document.createElement('div');
+            backdrop.className = 'sidebar-backdrop';
+            document.body.appendChild(backdrop);
+        }
+
+        // Close sidebar intuitively if background is safely clicked
+        backdrop.addEventListener('click', () => {
+            document.body.classList.remove('sb-sidenav-toggled');
+        });
+
+        // Loop over links seamlessly attaching close logic for internal nav flows safely
+        links.forEach(l => {
+            l.addEventListener('click', () => {
+                if (window.innerWidth <= 991) {
+                    document.body.classList.remove('sb-sidenav-toggled');
+                }
+            });
+        });
     }
 
     // Inject Change Password Modal dynamically into body

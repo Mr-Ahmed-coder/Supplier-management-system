@@ -183,6 +183,27 @@ body.sb-sidenav-toggled #sidebar-wrapper {
   margin-left: 0;
 }
 
+/* Sidebar Backdrop Mobile Overlay */
+.sidebar-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+  z-index: 1040;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+body.sb-sidenav-toggled .sidebar-backdrop {
+  opacity: 1;
+  visibility: visible;
+}
+
 @media (min-width: 992px) {
   #sidebar-wrapper {
     margin-left: 0;
@@ -318,6 +339,10 @@ body.sb-sidenav-toggled #sidebar-wrapper {
 /* ─── 5. TABLES ─── */
 .table-responsive {
   border-radius: 12px;
+  width: 100%;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--border-color);
 }
 
 .table {
@@ -699,6 +724,24 @@ body.sb-sidenav-toggled #sidebar-wrapper {
     position: fixed;
     height: 100vh;
     z-index: 1050;
+    box-shadow: 4px 0 15px rgba(0,0,0,0.1);
+  }
+  
+  #sidebar-wrapper .list-group-item {
+    font-size: 1.05rem;
+    padding: 1rem 1.25rem;
+  }
+  
+  .page-title {
+    font-size: 1.1rem;
+    max-width: 140px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  
+  .user-info {
+    gap: 6px;
   }
 
   .user-role-badge {
