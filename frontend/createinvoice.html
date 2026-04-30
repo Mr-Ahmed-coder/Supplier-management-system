@@ -271,7 +271,7 @@
 
           if (queryId) {
             editId = queryId;
-            document.getElementById('pageHeaderTitle').innerText = 'Edit Invoice';
+            document.getElementById('pageHeaderTitle').innerText = 'View Invoice Ledger';
             const printBtn = document.getElementById('printInvoiceBtn');
             printBtn.style.display = 'inline-block';
             printBtn.href = `printinvoice.html?id=${editId}`;
@@ -298,6 +298,22 @@
                 const dd = new Date(inv.dueDate);
                 if (!isNaN(dd)) document.getElementById("invoiceDueDate").value = dd.toISOString().split('T')[0];
               }
+
+              // Apply Immutability Locks natively freezing core editing
+              document.getElementById("customerName").readOnly = true;
+              document.getElementById("customerName").classList.add("pointer-events-none", "fw-bold", "text-dark");
+              document.getElementById("customerPhone").readOnly = true;
+              document.getElementById("customerPhone").classList.add("pointer-events-none");
+              document.getElementById("customerLocation").readOnly = true;
+              document.getElementById("customerLocation").classList.add("pointer-events-none");
+              document.getElementById("invoiceDate").readOnly = true;
+              document.getElementById("invoiceDate").classList.add("pointer-events-none");
+              document.getElementById("invoiceDueDate").readOnly = true;
+              document.getElementById("invoiceDueDate").classList.add("pointer-events-none");
+
+              // Hide Modification UI globally
+              document.getElementById("itemProduct").parentElement.parentElement.style.display = "none";
+              document.getElementById("saveInvoice").style.display = "none";
               
               const amtInput = document.getElementById("amountPaid");
               amtInput.type = "text";
@@ -431,7 +447,7 @@
                       <td>${item.quantity}</td>
                       <td class="fw-bold text-primary">UGX ${item.subtotal.toLocaleString('en-US')}</td>
                       <td class="text-center">
-                          <button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})"><i class="bi bi-x"></i></button>
+                          ${!editId ? `<button class="btn btn-sm btn-outline-danger" onclick="removeFromCart(${index})"><i class="bi bi-x"></i></button>` : `<i class="bi bi-lock-fill text-muted" title="Locked"></i>`}
                       </td>
                   </tr>
               `;
