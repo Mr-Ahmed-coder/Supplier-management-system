@@ -31,6 +31,12 @@ const updateCustomer = catchAsync(async (req, res, next) => {
   if (!customer) {
     return next(new AppError('Customer not found', 404));
   }
+
+  // Safely intercept and ignore any manual balance modifiers explicitly
+  if (req.body.balance !== undefined) {
+    delete req.body.balance;
+  }
+
   const updatedCustomer = await Customer.findByIdAndUpdate(req.params.id, req.body, { new: true, runValidators: true });
   res.json(updatedCustomer);
 });
