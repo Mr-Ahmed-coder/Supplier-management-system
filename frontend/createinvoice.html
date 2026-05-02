@@ -186,7 +186,10 @@
             <div id="paymentLedgerSection" style="display:none;" class="mb-5">
               <div class="d-flex justify-content-between align-items-center mb-3">
                 <h5 class="fw-bold text-dark m-0">Payment History</h5>
-                <button class="btn btn-sm btn-success shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addPaymentModal"><i class="bi bi-cash-coin me-1"></i> Log Payment</button>
+                <div class="d-flex align-items-center">
+                  <button id="logPaymentBtn" class="btn btn-sm btn-success shadow-sm fw-semibold" data-bs-toggle="modal" data-bs-target="#addPaymentModal"><i class="bi bi-cash-coin me-1"></i> Log Payment</button>
+                  <span id="fullyPaidBadge" class="badge bg-success fs-6 px-3 py-2 shadow-sm" style="display:none;"><i class="bi bi-check-circle me-1"></i> Fully Paid</span>
+                </div>
               </div>
               <div class="table-responsive border rounded-3 bg-white shadow-sm">
                 <table class="table table-hover align-middle mb-0">
@@ -418,12 +421,19 @@
           
           balInput.value = balance.toLocaleString('en-US');
           
+          const logBtn = document.getElementById("logPaymentBtn");
+          const paidBadge = document.getElementById("fullyPaidBadge");
+
           if (balance === 0 && totalRaw > 0) {
               balInput.className = "form-control-plaintext fw-bold text-success p-0 m-0 pointer-events-none";
               if (balLabel) balLabel.className = "fs-4 fw-bold text-success me-2";
+              if (logBtn && editId) logBtn.style.display = "none";
+              if (paidBadge && editId) paidBadge.style.display = "inline-block";
           } else {
               balInput.className = "form-control-plaintext fw-bold text-danger p-0 m-0 pointer-events-none";
               if (balLabel) balLabel.className = "fs-4 fw-bold text-danger me-2";
+              if (logBtn && editId) logBtn.style.display = "inline-block";
+              if (paidBadge && editId) paidBadge.style.display = "none";
           }
       }
 

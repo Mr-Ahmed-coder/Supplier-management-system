@@ -15,6 +15,13 @@ const createReceipt = catchAsync(async (req, res, next) => {
     return next(new AppError('Number and amount are required', 400));
   }
 
+  if (invoice) {
+    const invDoc = await Invoice.findById(invoice);
+    if (invDoc && invDoc.balance <= 0) {
+      return next(new AppError('Invoice is already fully paid. No further payments can be logged.', 400));
+    }
+  }
+
   const receipt = await Receipt.create({
     number, invoice, customer, amount, date, method, createdBy: req.user._id
   });
